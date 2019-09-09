@@ -1,5 +1,5 @@
 import { setPluginContext } from 'kea'
-import Path from 'path-parser'
+import UrlPattern from 'url-pattern'
 
 import { router } from './router'
 
@@ -53,7 +53,7 @@ export function routerPlugin ({
               const urlToActionMapping = input.urlToAction(logic)
               const routes = Object.keys(urlToActionMapping).map(pathFromRoutes => ({
                 path: pathFromRoutes,
-                parser: new Path(pathFromRoutes),
+                pattern: new UrlPattern(pathFromRoutes),
                 action: urlToActionMapping[pathFromRoutes]
               }))
 
@@ -65,7 +65,7 @@ export function routerPlugin ({
                 let params
 
                 for (const route of routes) {
-                  params = route.parser.test(pathInRoutes)
+                  params = route.pattern.match(pathInRoutes)
                   if (params) {
                     matchedRoute = route
                     break
