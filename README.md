@@ -8,8 +8,6 @@
 
 Router plugin for kea. Works with kea `1.0.0-rc.8` and up.
 
-This version bundles all of react-router to get the path parsing working. Future version will be much leaner!
-
 ## Installation
 
 `kea-router` depends on `kea-listeners`, so you must add both.
