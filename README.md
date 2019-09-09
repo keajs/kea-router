@@ -49,12 +49,15 @@ kea({
   }),
 
   urlToAction: ({ actions }) => ({
-    '/articles/:id/comments': ({ id }) => {
+    '/articles': () => actions.openList(),
+    '/articles/:id(/:extra)': ({ id, extra }) => {
       actions.openArticle(id)
-      actions.openComments()
+      if (extra === 'comments') {
+        actions.openComments()
+      } else {
+        actions.closeComments()
+      }
     },
-    '/articles/:id': ({ id }) => actions.openArticle(id),
-    '/articles': () => actions.openList()
   })
 })
 ```
