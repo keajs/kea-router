@@ -6,5 +6,64 @@
 
 # kea-router
 
-Router plugin for kea. Works with kea `1.0.0-rc.4` and up.
+Router plugin for kea. Works with kea `1.0.0-rc.8` and up.
 
+This version bundles all of react-router to get the path parsing working. This is probably not what you want to use in production.
+
+Future version will be much leaner!
+
+## Installation
+
+```sh
+yarn add kea-router
+```
+
+```js
+import { routerPlugin } from 'kea-router'
+
+resetContext({
+  plugins: [routerPlugin]
+})
+```
+
+## Sample usage
+
+```js
+kea({
+  // define actions selectEmail and unselectEmail
+  actions: () => ({ ... }),
+
+  actionToUrl: ({ actions }) => ({
+    [actions.selectEmail]: () => '/signup/email',
+    [actions.unselectEmail]: () => '/signup'
+  }),
+
+  urlToAction: ({ actions }) => ({
+    '/signup/email': () => actions.selectEmail(),
+    '/signup': () => actions.unselectEmail()
+  })
+})
+```
+
+To get or manipulate the route
+
+```js
+import { router } from 'kea-router'
+
+kea({
+  connect: {
+    actions: [
+      router, [
+        'push',   // push(url)
+        'replace' // replace(url),
+        'locationChanged' // payload == { pathname, search, hash, method }
+      ]
+    ],
+    values: [
+      router, [
+        'location' // { pathname, search, hash }
+      ]
+    ]
+  }
+})
+```
