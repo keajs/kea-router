@@ -36,7 +36,8 @@
     ]
   },
   "peerDependencies": {
-    "kea": ">= 1.0.0-rc.8"
+    "kea": ">= 1.0.0-rc.8",
+    "kea-listeners": ">= 0.2.1"
   },
   "devDependencies": {
     "@babel/cli": "^7.0.0",
@@ -57,6 +58,7 @@
     "@babel/plugin-proposal-throw-expressions": "^7.0.0",
     "@babel/plugin-syntax-dynamic-import": "^7.0.0",
     "@babel/plugin-syntax-import-meta": "^7.0.0",
+    "@babel/polyfill": "^7.6.0",
     "@babel/preset-env": "^7.0.0",
     "@babel/preset-react": "^7.0.0",
     "babel-core": "^7.0.0-bridge.0",
@@ -77,6 +79,7 @@
     "jest-environment-node-debug": "^2.0.0",
     "jsdom": "^15.0.0",
     "kea": "^1.0.0-rc.8",
+    "kea-listeners": "^0.2.1",
     "prop-types": "^15.7.2",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
@@ -90,7 +93,6 @@
     "rollup-plugin-node-resolve": "^4.2.3"
   },
   "dependencies": {
-    "react-router": "^5.0.1",
-    "react-router-config": "^5.0.1"
+    "path-parser": "^4.2.0"
   }
 }
