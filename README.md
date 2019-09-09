@@ -8,44 +8,60 @@
 
 Router plugin for kea. Works with kea `1.0.0-rc.8` and up.
 
-This version bundles all of react-router to get the path parsing working. This is probably not what you want to use in production.
-
-Future version will be much leaner!
+This version bundles all of react-router to get the path parsing working. Future version will be much leaner!
 
 ## Installation
 
+`kea-router` depends on `kea-listeners`, so you must add both.
+
 ```sh
-yarn add kea-router
+yarn add kea-router kea-listener
 ```
+
+Add them to the plugins list when resetting the context:
 
 ```js
 import { routerPlugin } from 'kea-router'
+import listenersPlugin from 'kea-listeners'
 
 resetContext({
-  plugins: [routerPlugin]
+  plugins: [listenersPlugin, routerPlugin]
 })
 ```
 
+You may add extra options with `routerPlugin(options)`, see the source for more :)
+
 ## Sample usage
+
+`kea-router` adds two fields to your logic: `urlToAction` and `actionToUrl`. See below for sample usage:
 
 ```js
 kea({
-  // define actions selectEmail and unselectEmail
+  // define the actions from below
   actions: () => ({ ... }),
 
-  actionToUrl: ({ actions }) => ({
-    [actions.selectEmail]: () => '/signup/email',
-    [actions.unselectEmail]: () => '/signup'
+  // define article = { id, ... }
+  reducers: () => ({ ... }),
+
+  actionToUrl: ({ actions, values }) => ({
+    [actions.openList]: ({ id }) => `/articles`,
+    [actions.openArticle]: ({ id }) => `/articles/${id}`,
+    [actions.openComments]: () => `/articles/${values.article.id}/comments`,
+    [actions.closeComments]: () => `/articles/${values.article.id}`
   }),
 
   urlToAction: ({ actions }) => ({
-    '/signup/email': () => actions.selectEmail(),
-    '/signup': () => actions.unselectEmail()
+    '/articles/:id/comments': ({ id }) => {
+      actions.openArticle(id)
+      actions.openComments()
+    },
+    '/articles/:id': ({ id }) => actions.openArticle(id),
+    '/articles': () => actions.openList()
   })
 })
 ```
 
-To get or manipulate the route
+To get or manipulate the route, import `router` and ask it for the following:
 
 ```js
 import { router } from 'kea-router'
