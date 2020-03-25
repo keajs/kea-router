@@ -5,6 +5,10 @@ As we're at the 0.x phase, deprecations and breaking changes will still happen. 
 
 Once we react 1.0 all deprecations will be removed and the project will switch to SemVer.
 
+## 0.1.2 - 2020-03-25
+### Changed
+- Don't change the URL if actionToUrl returns undefined
+
 ## 0.1.1 - 2017-09-29
 ### Changed
 - First version

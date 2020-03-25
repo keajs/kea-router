@@ -83,6 +83,11 @@ export function routerPlugin ({
                   const currentPathInWindow = pathname + search
 
                   const pathInRoutes = urlMapping(payload)
+
+                  if (typeof pathInRoutes === 'undefined') {
+                    return
+                  }
+
                   const pathInWindow = pathFromRoutesToWindow(pathInRoutes)
 
                   if (currentPathInWindow !== pathInWindow) {
