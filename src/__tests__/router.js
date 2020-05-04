@@ -2,7 +2,6 @@
 import { kea, resetContext } from 'kea'
 
 import '@babel/polyfill'
-import listenersPlugin from 'kea-listeners'
 
 import { routerPlugin } from '../plugin'
 import { router } from '../router'
@@ -21,7 +20,6 @@ test('urlToAction and actionToUrl work', async () => {
 
   resetContext({
     plugins: [
-      listenersPlugin,
       routerPlugin({ history, location })
     ],
     createStore: { middleware: [] }
@@ -58,7 +56,7 @@ test('urlToAction and actionToUrl work', async () => {
 
     actionToUrl: ({ actions }) => ({
       [actions.first]: () => '/pages/first',
-      [actions.second]: () => '/pages/second',
+      second: () => '/pages/second',
       [actions.page]: ({ page }) => `/pages/${page}`,
       [actions.list]: () => `/pages`
     })
