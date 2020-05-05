@@ -99,3 +99,64 @@ test('urlToAction and actionToUrl work', async () => {
 
   unmount()
 })
+
+test('encode and decode for search and hash', async () => {
+  const location = {
+    pathname: '/pages/first',
+    search: '?query=string',
+    hash: '#hash=stuff'
+  }
+
+  const history = {
+    pushState (state, _, url) { location.pathname = url },
+    replaceState (state, _, url) { location.pathname = url }
+  }
+
+  resetContext({
+    plugins: [
+      routerPlugin({ history, location })
+    ],
+    createStore: { middleware: [] }
+  })
+
+  let evaluatedUrl = 0
+
+  const logic = kea({
+    actions: () => ({
+      first: true,
+      second: true,
+    }),
+
+    reducers: ({ actions }) => ({
+    }),
+
+    urlToAction: ({ actions }) => ({
+      '/pages/:id': ({ id }, search, hash) => {
+        if (id === 'first') {
+          expect(search).toMatchObject({ query: 'string' })
+          expect(hash).toMatchObject({ hash: 'stuff' })
+        } else {
+          expect(search).toMatchObject({ key: 'value', obj: { a: 'b' }, bool: true, number: 3.14 })
+          expect(hash).toMatchObject({ hashishere: null })
+        }
+
+        evaluatedUrl += 1
+      }
+    }),
+
+    actionToUrl: ({ actions }) => ({
+      second: () => ['/pages/second', {}]
+    })
+  })
+
+  const unmount = logic.mount()
+
+  expect(location.pathname).toBe('/pages/first')
+  expect(evaluatedUrl).toBe(1)
+
+  router.actions.push(`/pages/second?key=value&obj=${encodeURIComponent(JSON.stringify({ a: 'b' }))}&bool=true&number=3.14#hashishere`)
+
+  expect(evaluatedUrl).toBe(2)
+
+  unmount()
+})

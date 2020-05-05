@@ -2,6 +2,7 @@ import { setPluginContext } from 'kea'
 import UrlPattern from 'url-pattern'
 
 import { router } from './router'
+import { encodeParams as encode, decodeParams as decode } from './utils'
 
 const memoryHistroy = {
   pushState (state, _, url) {},
@@ -12,7 +13,9 @@ export function routerPlugin ({
   history: _history,
   location: _location,
   pathFromRoutesToWindow = path => path,
-  pathFromWindowToRoutes = path => path
+  pathFromWindowToRoutes = path => path,
+  encodeParams = encode,
+  decodeParams = decode
 } = {}) {
   const history = _history || (typeof window !== 'undefined' ? window.history : memoryHistroy)
   const location = _location || (typeof window !== 'undefined' ? window.location : {})
@@ -57,7 +60,7 @@ export function routerPlugin ({
                 action: urlToActionMapping[pathFromRoutes]
               }))
 
-              listeners[actions.__routerLocationChanged] = function ({ pathname }) {
+              listeners[actions.__routerLocationChanged] = function ({ pathname, search, hash }) {
                 const pathInWindow = decodeURI(pathname)
                 const pathInRoutes = pathFromWindowToRoutes(pathInWindow)
 
@@ -72,7 +75,7 @@ export function routerPlugin ({
                   }
                 }
 
-                matchedRoute && matchedRoute.action(params)
+                matchedRoute && matchedRoute.action(params, decodeParams(search, '?'), decodeParams(hash, '#'))
               }
             }
 
