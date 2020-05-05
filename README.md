@@ -6,7 +6,7 @@
 
 # kea-router
 
-Router plugin for kea. Works with kea `1.0.0-rc.8` and up.
+Router plugin for kea. Works with kea `1.0.0` and up.
 
 ## Installation
 
