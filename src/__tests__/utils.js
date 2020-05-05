@@ -27,7 +27,7 @@ test('encode & decode works', async () => {
 
   for (const option of reverseOptions) {
     const encoded = encodeParams(option, '?')
-    expect(decodeParams(encoded, '?')).toMatchObject(option)
+    expect(decodeParams(encoded, '?')).toEqual(option)
   }
 
   for (const [option, result] of specialEncode) {
@@ -37,7 +37,7 @@ test('encode & decode works', async () => {
 
   for (const [option, result] of specialDecode) {
     const decoded = decodeParams(option, '?')
-    expect(decoded).toMatchObject(result)
+    expect(decoded).toEqual(result)
   }
 })
 
@@ -48,9 +48,10 @@ test('symbols work', async () => {
   expect(encodeParams({ }, '?')).toBe('')
   expect(encodeParams(undefined, '?')).toBe('')
 
-  expect(decodeParams('', '?')).toMatchObject({})
-  expect(decodeParams('a=b', '?')).toMatchObject({ a: 'b' })
-  expect(decodeParams('?a=b', '?')).toMatchObject({ a: 'b' })
-  expect(decodeParams('#a=b', '?')).toMatchObject({ '#a': 'b' })
-  expect(decodeParams('?a=b', '')).toMatchObject({ '?a': 'b' })
+  expect(decodeParams('', '')).toEqual({})
+  expect(decodeParams('', '?')).toEqual({})
+  expect(decodeParams('a=b', '?')).toEqual({ a: 'b' })
+  expect(decodeParams('?a=b', '?')).toEqual({ a: 'b' })
+  expect(decodeParams('#a=b', '?')).toEqual({ '#a': 'b' })
+  expect(decodeParams('?a=b', '')).toEqual({ '?a': 'b' })
 })

@@ -15,7 +15,7 @@ function parseValue (value) {
 }
 
 export function decodeParams (input, symbol) {
-  if (input[0] === symbol) {
+  if (symbol && input.indexOf(symbol) === 0) {
     input = input.slice(1)
   }
 
@@ -25,7 +25,9 @@ export function decodeParams (input, symbol) {
     param = param.replace(/\+/g, ' ')
     const index = param.indexOf('=')
     if (index === -1) {
-      ret[decodeURIComponent(param)] = null
+      if (param.length > 0) {
+        ret[decodeURIComponent(param)] = null
+      }
     } else {
       const key = decodeURIComponent(param.slice(0, index))
       const value = decodeURIComponent(param.slice(index + 1))
@@ -55,4 +57,14 @@ export function encodeParams (obj, symbol) {
   }).filter(k => k.length !== 0).join('&')
 
   return string.length > 0 ? symbol + string : ''
+}
+
+export function stringOrObjectToString (input, symbol) {
+  if (!input) {
+    return ''
+  }
+
+  return typeof input === 'object'
+    ? encodeParams(input, symbol)
+    : (input.indexOf(symbol) === 0 ? input : '?' + input)
 }

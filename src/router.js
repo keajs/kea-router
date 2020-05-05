@@ -1,5 +1,6 @@
 /* global window */
 import { kea, getPluginContext } from 'kea'
+import { decodeParams } from './utils'
 
 /*
 Usage:
@@ -21,8 +22,8 @@ export const router = kea({
   path: () => ['kea', 'router'],
 
   actions: () => ({
-    push: url => ({ url }),
-    replace: url => ({ url }),
+    push: (url, searchInput, hashInput) => ({ url, searchInput, hashInput }),
+    replace: (url, searchInput, hashInput) => ({ url, searchInput, hashInput }),
     locationChanged: ({ method, pathname, search, hash, initial = false }) => ({
       method,
       pathname,
@@ -47,12 +48,26 @@ export const router = kea({
   }),
 
   sharedListeners: ({ actions }) => ({
-    updateLocation: ({ url }, breakpoint, action) => {
+    updateLocation: ({ url, searchInput, hashInput }, breakpoint, action) => {
       const method = action.type === actions.push.toString() ? 'push' : 'replace'
-      const { history } = getPluginContext('router')
+      const { history, encodeParams } = getPluginContext('router')
 
-      history[`${method}State`]({}, '', url)
-      actions.locationChanged({ ...parsePath(url), method: method.toUpperCase() })
+      const parsedPath = parsePath(url)
+
+      if (typeof searchInput === 'object') {
+        parsedPath.search = encodeParams(Object.assign(decodeParams(parsedPath.search, '?'), searchInput), '?')
+      } else if (typeof searchInput === 'string') {
+        parsedPath.search = encodeParams(Object.assign(decodeParams(parsedPath.search, '?'), decodeParams(searchInput, '?')), '?')
+      }
+
+      if (typeof hashInput === 'object') {
+        parsedPath.hash = encodeParams(Object.assign(decodeParams(parsedPath.hash, '#'), hashInput), '#')
+      } else if (typeof hashInput === 'string') {
+        parsedPath.hash = encodeParams(Object.assign(decodeParams(parsedPath.hash, '#'), decodeParams(hashInput, '#')), '#')
+      }
+
+      history[`${method}State`]({}, '', `${parsedPath.pathname}${parsedPath.search}${parsedPath.hash}`)
+      actions.locationChanged({ ...parsedPath, method: method.toUpperCase() })
     }
   }),
 
@@ -93,7 +108,7 @@ function getLocationFromContext () {
 }
 
 // copied from react-router! :)
-function parsePath (path) {
+export function parsePath (path) {
   let pathname = path || '/'
   let search = ''
   let hash = ''

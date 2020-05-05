@@ -4,7 +4,7 @@ import { kea, resetContext } from 'kea'
 import '@babel/polyfill'
 
 import { routerPlugin } from '../plugin'
-import { router } from '../router'
+import { parsePath, router } from '../router'
 
 test('urlToAction and actionToUrl work', async () => {
   const location = {
@@ -14,8 +14,8 @@ test('urlToAction and actionToUrl work', async () => {
   }
 
   const history = {
-    pushState (state, _, url) { location.pathname = url },
-    replaceState (state, _, url) { location.pathname = url }
+    pushState (state, _, url) { Object.assign(location, parsePath(url)) },
+    replaceState (state, _, url) { Object.assign(location, parsePath(url)) }
   }
 
   resetContext({
@@ -108,8 +108,8 @@ test('encode and decode for search and hash', async () => {
   }
 
   const history = {
-    pushState (state, _, url) { location.pathname = url },
-    replaceState (state, _, url) { location.pathname = url }
+    pushState (state, _, url) { Object.assign(location, parsePath(url)) },
+    replaceState (state, _, url) { Object.assign(location, parsePath(url)) }
   }
 
   resetContext({
@@ -125,6 +125,8 @@ test('encode and decode for search and hash', async () => {
     actions: () => ({
       first: true,
       second: true,
+      third: true,
+      sixth: true
     }),
 
     reducers: ({ actions }) => ({
@@ -133,11 +135,23 @@ test('encode and decode for search and hash', async () => {
     urlToAction: ({ actions }) => ({
       '/pages/:id': ({ id }, search, hash) => {
         if (id === 'first') {
-          expect(search).toMatchObject({ query: 'string' })
-          expect(hash).toMatchObject({ hash: 'stuff' })
-        } else {
-          expect(search).toMatchObject({ key: 'value', obj: { a: 'b' }, bool: true, number: 3.14 })
-          expect(hash).toMatchObject({ hashishere: null })
+          expect(search).toEqual({ query: 'string' })
+          expect(hash).toEqual({ hash: 'stuff' })
+        } else if (id === 'second') {
+          expect(search).toEqual({ key: 'value', obj: { a: 'b' }, bool: true, number: 3.14 })
+          expect(hash).toEqual({ hashishere: null })
+        } else if (id === 'third') {
+          expect(search).toEqual({ search: 'ishere' })
+          expect(hash).toEqual({ hash: 'isalsohere' })
+        } else if (id === 'fourth') {
+          expect(search).toEqual({ key: 'value', otherkey: 'value' })
+          expect(hash).toEqual({ hashishere: null, morehash: false })
+        } else if (id === 'fifth') {
+          expect(search).toEqual({ foo: 'bar', key: 'meh', otherKey: 'value' })
+          expect(hash).toEqual({ hashishere: null, morehash: false })
+        } else if (id === 'sixth') {
+          expect(search).toEqual({ search: 'inline' })
+          expect(hash).toEqual({ hash: 'alsoinline' })
         }
 
         evaluatedUrl += 1
@@ -145,7 +159,8 @@ test('encode and decode for search and hash', async () => {
     }),
 
     actionToUrl: ({ actions }) => ({
-      second: () => ['/pages/second', {}]
+      third: () => ['/pages/third', { search: 'ishere' }, { hash: 'isalsohere' }],
+      sixth: () => ['/pages/sixth', '?search=inline', '#hash=alsoinline']
     })
   })
 
@@ -157,6 +172,38 @@ test('encode and decode for search and hash', async () => {
   router.actions.push(`/pages/second?key=value&obj=${encodeURIComponent(JSON.stringify({ a: 'b' }))}&bool=true&number=3.14#hashishere`)
 
   expect(evaluatedUrl).toBe(2)
+
+  logic.actions.third()
+
+  expect(location.pathname).toBe('/pages/third')
+  expect(location.search).toBe('?search=ishere')
+  expect(location.hash).toBe('#hash=isalsohere')
+
+  expect(evaluatedUrl).toBe(3)
+
+  router.actions.push(`/pages/fourth?key=value#hashishere&morehash=true`, '?otherkey=value', 'morehash=false')
+
+  expect(location.pathname).toBe('/pages/fourth')
+  expect(location.search).toBe('?key=value&otherkey=value')
+  expect(location.hash).toBe('#hashishere&morehash=false')
+
+  expect(evaluatedUrl).toBe(4)
+
+  router.actions.push(`/pages/fifth?key=value&foo=bar#hashishere&morehash=true`, { key: 'meh', otherKey: 'value' }, { morehash: false })
+
+  expect(location.pathname).toBe('/pages/fifth')
+  expect(location.search).toBe('?key=meh&foo=bar&otherKey=value')
+  expect(location.hash).toBe('#hashishere&morehash=false')
+
+  expect(evaluatedUrl).toBe(5)
+
+  logic.actions.sixth()
+
+  expect(location.pathname).toBe('/pages/sixth')
+  expect(location.search).toBe('?search=inline')
+  expect(location.hash).toBe('#hash=alsoinline')
+
+  expect(evaluatedUrl).toBe(6)
 
   unmount()
 })
