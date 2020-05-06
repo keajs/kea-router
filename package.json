@@ -1,7 +1,7 @@
 {
   "name": "kea-router",
   "version": "0.2.2",
-  "description": "Action Listener side-effects for Kea",
+  "description": "Router plugin for Kea",
   "author": "Marius Andra",
   "license": "MIT",
   "main": "lib/index.js",

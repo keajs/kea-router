@@ -119,6 +119,10 @@ test('encode and decode for search and hash', async () => {
     createStore: { middleware: [] }
   })
 
+  expect(router.values.searchParams).toEqual({ query: 'string' })
+  expect(router.values.hashParams).toEqual({ hash: 'stuff' })
+  expect(router.values.location).toEqual(location)
+
   let evaluatedUrl = 0
 
   const logic = kea({
@@ -167,10 +171,14 @@ test('encode and decode for search and hash', async () => {
   const unmount = logic.mount()
 
   expect(location.pathname).toBe('/pages/first')
+  expect(router.values.searchParams).toEqual({ query: 'string' })
+  expect(router.values.hashParams).toEqual({ hash: 'stuff' })
   expect(evaluatedUrl).toBe(1)
 
   router.actions.push(`/pages/second?key=value&obj=${encodeURIComponent(JSON.stringify({ a: 'b' }))}&bool=true&number=3.14#hashishere`)
 
+  expect(router.values.searchParams).toEqual({ key: 'value', obj: { a: 'b' }, bool: true, number: 3.14 })
+  expect(router.values.hashParams).toEqual({ hashishere: null })
   expect(evaluatedUrl).toBe(2)
 
   logic.actions.third()
@@ -178,6 +186,8 @@ test('encode and decode for search and hash', async () => {
   expect(location.pathname).toBe('/pages/third')
   expect(location.search).toBe('?search=ishere')
   expect(location.hash).toBe('#hash=isalsohere')
+  expect(router.values.searchParams).toEqual({ search: 'ishere' })
+  expect(router.values.hashParams).toEqual({ hash: 'isalsohere' })
 
   expect(evaluatedUrl).toBe(3)
 
@@ -186,6 +196,8 @@ test('encode and decode for search and hash', async () => {
   expect(location.pathname).toBe('/pages/fourth')
   expect(location.search).toBe('?key=value&otherkey=value')
   expect(location.hash).toBe('#hashishere&morehash=false')
+  expect(router.values.searchParams).toEqual({ key: 'value', otherkey: 'value' })
+  expect(router.values.hashParams).toEqual({ hashishere: null, morehash: false })
 
   expect(evaluatedUrl).toBe(4)
 
@@ -194,6 +206,8 @@ test('encode and decode for search and hash', async () => {
   expect(location.pathname).toBe('/pages/fifth')
   expect(location.search).toBe('?key=meh&foo=bar&otherKey=value')
   expect(location.hash).toBe('#hashishere&morehash=false')
+  expect(router.values.searchParams).toEqual({ foo: 'bar', key: 'meh', otherKey: 'value' })
+  expect(router.values.hashParams).toEqual({ hashishere: null, morehash: false })
 
   expect(evaluatedUrl).toBe(5)
 
@@ -202,6 +216,8 @@ test('encode and decode for search and hash', async () => {
   expect(location.pathname).toBe('/pages/sixth')
   expect(location.search).toBe('?search=inline')
   expect(location.hash).toBe('#hash=alsoinline')
+  expect(router.values.searchParams).toEqual({ search: 'inline' })
+  expect(router.values.hashParams).toEqual({ hash: 'alsoinline' })
 
   expect(evaluatedUrl).toBe(6)
 

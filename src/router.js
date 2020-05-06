@@ -24,11 +24,13 @@ export const router = kea({
   actions: () => ({
     push: (url, searchInput, hashInput) => ({ url, searchInput, hashInput }),
     replace: (url, searchInput, hashInput) => ({ url, searchInput, hashInput }),
-    locationChanged: ({ method, pathname, search, hash, initial = false }) => ({
+    locationChanged: ({ method, pathname, search, searchParams, hash, hashParams, initial = false }) => ({
       method,
       pathname,
       search,
+      searchParams,
       hash,
+      hashParams,
       initial
     })
   }),
@@ -38,6 +40,18 @@ export const router = kea({
       getLocationFromContext(),
       {
         [actions.locationChanged]: (_, { pathname, search, hash }) => ({ pathname, search, hash })
+      }
+    ],
+    searchParams: [
+      decodeParams(getLocationFromContext().search, '?'),
+      {
+        [actions.locationChanged]: (_, { searchParams }) => searchParams
+      }
+    ],
+    hashParams: [
+      decodeParams(getLocationFromContext().hash, '#'),
+      {
+        [actions.locationChanged]: (_, { hashParams }) => hashParams
       }
     ]
   }),
@@ -54,20 +68,31 @@ export const router = kea({
 
       const parsedPath = parsePath(url)
 
-      if (typeof searchInput === 'object') {
-        parsedPath.search = encodeParams(Object.assign(decodeParams(parsedPath.search, '?'), searchInput), '?')
-      } else if (typeof searchInput === 'string') {
-        parsedPath.search = encodeParams(Object.assign(decodeParams(parsedPath.search, '?'), decodeParams(searchInput, '?')), '?')
+      let response = {
+        method: method.toUpperCase(),
+        pathname: parsedPath.pathname,
+        search: undefined, // set below
+        searchParams: decodeParams(parsedPath.search, '?'),
+        hash: undefined, // set below
+        hashParams: decodeParams(parsedPath.hash, '#')
       }
+
+      if (typeof searchInput === 'object') {
+        Object.assign(response.searchParams, searchInput)
+      } else if (typeof searchInput === 'string') {
+        Object.assign(response.searchParams, decodeParams(searchInput, '?'))
+      }
+      response.search = encodeParams(response.searchParams, '?')
 
       if (typeof hashInput === 'object') {
-        parsedPath.hash = encodeParams(Object.assign(decodeParams(parsedPath.hash, '#'), hashInput), '#')
+        Object.assign(response.hashParams, hashInput)
       } else if (typeof hashInput === 'string') {
-        parsedPath.hash = encodeParams(Object.assign(decodeParams(parsedPath.hash, '#'), decodeParams(hashInput, '#')), '#')
+        Object.assign(response.hashParams, decodeParams(hashInput, '#'))
       }
+      response.hash = encodeParams(response.hashParams, '#')
 
-      history[`${method}State`]({}, '', `${parsedPath.pathname}${parsedPath.search}${parsedPath.hash}`)
-      actions.locationChanged({ ...parsedPath, method: method.toUpperCase() })
+      history[`${method}State`]({}, '', `${response.pathname}${response.search}${response.hash}`)
+      actions.locationChanged(response)
     }
   }),
 
