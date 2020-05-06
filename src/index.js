@@ -16,3 +16,4 @@ Usage:
 
 export { router } from './router'
 export { routerPlugin } from './plugin'
+export { encodeParams, decodeParams } from './utils'
