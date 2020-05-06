@@ -62,7 +62,7 @@ export function routerPlugin ({
                 action: urlToActionMapping[pathFromRoutes]
               }))
 
-              listeners[actions.__routerLocationChanged] = function ({ pathname, search, hash }) {
+              listeners[actions.__routerLocationChanged] = function ({ pathname, searchParams, hashParams }) {
                 const pathInWindow = decodeURI(pathname)
                 const pathInRoutes = pathFromWindowToRoutes(pathInWindow)
 
@@ -77,7 +77,7 @@ export function routerPlugin ({
                   }
                 }
 
-                matchedRoute && matchedRoute.action(params, decodeParams(search, '?'), decodeParams(hash, '#'))
+                matchedRoute && matchedRoute.action(params, searchParams, hashParams)
               }
             }
 
@@ -107,15 +107,22 @@ export function routerPlugin ({
             return listeners
           },
 
-          events: ({ actions, listeners, cache, values }) => ({
+          events: ({ actions, listeners, cache }) => ({
             afterMount () {
               const locationChanged = actions.__routerLocationChanged
-
               if (listeners && listeners[locationChanged] && cache.__routerListeningToLocation) {
-                const routerLocation = values.__routerLocation
-                listeners[locationChanged].forEach(l =>
-                  l({ type: locationChanged.toString(), payload: { ...routerLocation, method: 'POP', initial: true } })
-                )
+                listeners[locationChanged].forEach(listener => {
+                  listener({
+                    type: locationChanged.toString(),
+                    payload: {
+                      ...router.values.location,
+                      searchParams: router.values.searchParams,
+                      hashParams: router.values.hashParams,
+                      method: 'POP',
+                      initial: true
+                    }
+                  })
+                })
               }
             }
           })

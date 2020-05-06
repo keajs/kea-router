@@ -109,7 +109,9 @@ export const router = kea({
             method: 'POP',
             pathname: location.pathname,
             search: location.search,
-            hash: location.hash
+            searchParams: decodeParams(location.search, '?'),
+            hash: location.hash,
+            hashParams: decodeParams(location.hash, '#')
           })
         }
       }
