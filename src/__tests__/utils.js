@@ -13,7 +13,17 @@ test('encode & decode works', async () => {
     { key: true, otherKey: false },
     { key: null, otherKey: 'not so null' },
     { otherKey: 'a=b' },
-    { otherKey: 'a=b&c=d' }
+    { otherKey: 'a=b&c=d' },
+    { otherKey: { "otherKey": {} } }, // eslint-disable-line
+    { otherKey: '{ "otherKey": {} }' },
+    { otherKey: {} },
+    { otherKey: '{ }' },
+    { otherKey: '{}' },
+    { otherKey: '{} ' },
+    { otherKey: [] },
+    { otherKey: '[ ] ' },
+    { otherKey: '[]' },
+    { otherKey: '[] ' },
   ]
 
   const specialEncode = [
@@ -39,6 +49,8 @@ test('encode & decode works', async () => {
     const decoded = decodeParams(option, '?')
     expect(decoded).toEqual(result)
   }
+
+  expect(encodeParams({ key: '{}' }, '?')).toBe('?key=%7B%7D%20')
 })
 
 test('symbols work', async () => {

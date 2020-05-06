@@ -3,12 +3,24 @@ function parseValue (value) {
     value = Number(value)
   } else if (value !== null && (value.toLowerCase() === 'true' || value.toLowerCase() === 'false')) {
     value = value.toLowerCase() === 'true'
+  } else if (value.length >= 2 && (value.match(/^\[.*\] +$/) || value.match(/^\{.*\} +$/))) {
+    value = value.substring(0, value.length - 1)
   } else if (value.length >= 2 && (value.match(/^\[.*\]$/) || value.match(/^\{.*\}$/))) {
     try {
       value = JSON.parse(value)
     } catch (e) {
       // well, damn
     }
+  }
+
+  return value
+}
+
+function serializeValue (value) {
+  if (typeof value === 'object') {
+    value = JSON.stringify(value)
+  } else if (typeof value === 'string' && (value.match(/^\[.*\] *$/) || value.match(/^\{.*\} *$/))) {
+    value = value + ' '
   }
 
   return value
@@ -50,10 +62,7 @@ export function encodeParams (obj, symbol) {
     if (value === null) {
       return encodeURIComponent(key)
     }
-    if (typeof value === 'object') {
-      value = JSON.stringify(value)
-    }
-    return encodeURIComponent(key) + '=' + encodeURIComponent(value)
+    return encodeURIComponent(key) + '=' + encodeURIComponent(serializeValue(value))
   }).filter(k => k.length !== 0).join('&')
 
   return string.length > 0 ? symbol + string : ''
