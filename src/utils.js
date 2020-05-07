@@ -1,3 +1,5 @@
+import { getPluginContext } from 'kea'
+
 function parseValue (value) {
   if (!Number.isNaN(Number(value)) && (typeof value === 'string' && value.trim() !== '')) {
     value = Number(value)
@@ -76,4 +78,58 @@ export function stringOrObjectToString (input, symbol) {
   return typeof input === 'object'
     ? encodeParams(input, symbol)
     : (input.indexOf(symbol) === 0 ? input : '?' + input)
+}
+
+// copied from react-router! :)
+export function parsePath (path) {
+  let pathname = path || '/'
+  let search = ''
+  let hash = ''
+  let hashIndex = pathname.indexOf('#')
+
+  if (hashIndex !== -1) {
+    hash = pathname.substr(hashIndex)
+    pathname = pathname.substr(0, hashIndex)
+  }
+
+  let searchIndex = pathname.indexOf('?')
+
+  if (searchIndex !== -1) {
+    search = pathname.substr(searchIndex)
+    pathname = pathname.substr(0, searchIndex)
+  }
+
+  return {
+    pathname: pathname,
+    search: search === '?' ? '' : search,
+    hash: hash === '#' ? '' : hash
+  }
+}
+
+export function combineUrl (url, searchInput, hashInput, encodeParams = getPluginContext('router').encodeParams, decodeParams = getPluginContext('router').decodeParams) {
+  const parsedPath = parsePath(url)
+
+  let response = {
+    pathname: parsedPath.pathname,
+    search: undefined, // set below
+    searchParams: decodeParams(parsedPath.search, '?'),
+    hash: undefined, // set below
+    hashParams: decodeParams(parsedPath.hash, '#')
+  }
+
+  if (typeof searchInput === 'object') {
+    Object.assign(response.searchParams, searchInput)
+  } else if (typeof searchInput === 'string') {
+    Object.assign(response.searchParams, decodeParams(searchInput, '?'))
+  }
+  response.search = encodeParams(response.searchParams, '?')
+
+  if (typeof hashInput === 'object') {
+    Object.assign(response.hashParams, hashInput)
+  } else if (typeof hashInput === 'string') {
+    Object.assign(response.hashParams, decodeParams(hashInput, '#'))
+  }
+  response.hash = encodeParams(response.hashParams, '#')
+  response.url = `${response.pathname}${response.search}${response.hash}`
+  return response
 }

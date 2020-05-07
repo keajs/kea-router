@@ -1,6 +1,6 @@
 /* global window */
 import { kea, getPluginContext } from 'kea'
-import { decodeParams } from './utils'
+import { combineUrl } from './utils'
 
 /*
 Usage:
@@ -43,13 +43,13 @@ export const router = kea({
       }
     ],
     searchParams: [
-      decodeParams(getLocationFromContext().search, '?'),
+      getPluginContext('router').decodeParams(getLocationFromContext().search, '?'),
       {
         [actions.locationChanged]: (_, { searchParams }) => searchParams
       }
     ],
     hashParams: [
-      decodeParams(getLocationFromContext().hash, '#'),
+      getPluginContext('router').decodeParams(getLocationFromContext().hash, '#'),
       {
         [actions.locationChanged]: (_, { hashParams }) => hashParams
       }
@@ -64,35 +64,11 @@ export const router = kea({
   sharedListeners: ({ actions }) => ({
     updateLocation: ({ url, searchInput, hashInput }, breakpoint, action) => {
       const method = action.type === actions.push.toString() ? 'push' : 'replace'
-      const { history, encodeParams } = getPluginContext('router')
+      const { history } = getPluginContext('router')
+      const response = combineUrl(url, searchInput, hashInput)
 
-      const parsedPath = parsePath(url)
-
-      let response = {
-        method: method.toUpperCase(),
-        pathname: parsedPath.pathname,
-        search: undefined, // set below
-        searchParams: decodeParams(parsedPath.search, '?'),
-        hash: undefined, // set below
-        hashParams: decodeParams(parsedPath.hash, '#')
-      }
-
-      if (typeof searchInput === 'object') {
-        Object.assign(response.searchParams, searchInput)
-      } else if (typeof searchInput === 'string') {
-        Object.assign(response.searchParams, decodeParams(searchInput, '?'))
-      }
-      response.search = encodeParams(response.searchParams, '?')
-
-      if (typeof hashInput === 'object') {
-        Object.assign(response.hashParams, hashInput)
-      } else if (typeof hashInput === 'string') {
-        Object.assign(response.hashParams, decodeParams(hashInput, '#'))
-      }
-      response.hash = encodeParams(response.hashParams, '#')
-
-      history[`${method}State`]({}, '', `${response.pathname}${response.search}${response.hash}`)
-      actions.locationChanged(response)
+      history[`${method}State`]({}, '', response.url)
+      actions.locationChanged({ method: method.toUpperCase(), ...response })
     }
   }),
 
@@ -103,7 +79,7 @@ export const router = kea({
       }
 
       cache.listener = event => {
-        const { location } = getPluginContext('router')
+        const { location, decodeParams } = getPluginContext('router')
         if (location) {
           actions.locationChanged({
             method: 'POP',
@@ -132,30 +108,4 @@ function getLocationFromContext () {
     location: { pathname, search, hash }
   } = getPluginContext('router')
   return { pathname, search, hash }
-}
-
-// copied from react-router! :)
-export function parsePath (path) {
-  let pathname = path || '/'
-  let search = ''
-  let hash = ''
-  let hashIndex = pathname.indexOf('#')
-
-  if (hashIndex !== -1) {
-    hash = pathname.substr(hashIndex)
-    pathname = pathname.substr(0, hashIndex)
-  }
-
-  let searchIndex = pathname.indexOf('?')
-
-  if (searchIndex !== -1) {
-    search = pathname.substr(searchIndex)
-    pathname = pathname.substr(0, searchIndex)
-  }
-
-  return {
-    pathname: pathname,
-    search: search === '?' ? '' : search,
-    hash: hash === '#' ? '' : hash
-  }
 }

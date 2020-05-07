@@ -4,7 +4,8 @@ import { kea, resetContext } from 'kea'
 import '@babel/polyfill'
 
 import { routerPlugin } from '../plugin'
-import { parsePath, router } from '../router'
+import { parsePath } from '../utils'
+import { router } from '../router'
 
 test('urlToAction and actionToUrl work', async () => {
   const location = {
