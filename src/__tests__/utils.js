@@ -1,7 +1,7 @@
 /* global test, expect */
 import '@babel/polyfill'
 
-import { encodeParams, decodeParams } from '../utils'
+import { encodeParams, decodeParams, combineUrl } from '../utils'
 
 test('encode & decode works', async () => {
   const reverseOptions = [
@@ -66,4 +66,26 @@ test('symbols work', async () => {
   expect(decodeParams('?a=b', '?')).toEqual({ a: 'b' })
   expect(decodeParams('#a=b', '?')).toEqual({ '#a': 'b' })
   expect(decodeParams('?a=b', '')).toEqual({ '?a': 'b' })
+})
+
+test('combineUrl works', async () => {
+  expect(combineUrl('/path').url).toEqual('/path')
+
+  expect(combineUrl('/path?a=b&key=value', { key: 'otherValue' }).url).toEqual('/path?a=b&key=otherValue')
+  expect(combineUrl('/path?a=b&key=value', { key: 'otherValue' }, { hash: 'value' }).url).toEqual('/path?a=b&key=otherValue#hash=value')
+  expect(combineUrl('/path?a=b&key=value', '', { hash: 'value' }).url).toEqual('/path?a=b&key=value#hash=value')
+
+  expect(combineUrl('/path?a=b&key=value', '?key=otherValue').url).toEqual('/path?a=b&key=otherValue')
+  expect(combineUrl('/path?a=b&key=value', '?key=otherValue', '#hash=value').url).toEqual('/path?a=b&key=otherValue#hash=value')
+  expect(combineUrl('/path?a=b&key=value', '', '#hash=value').url).toEqual('/path?a=b&key=value#hash=value')
+
+  expect(combineUrl('/path?a=b&key=value', 'key=otherValue').url).toEqual('/path?a=b&key=otherValue')
+  expect(combineUrl('/path?a=b&key=value', 'key=otherValue', 'hash=value').url).toEqual('/path?a=b&key=otherValue#hash=value')
+  expect(combineUrl('/path?a=b&key=value', '', 'hash=value').url).toEqual('/path?a=b&key=value#hash=value')
+
+  expect(combineUrl('/path?a=b&key=value#hash=other', '', 'hash=value').url).toEqual('/path?a=b&key=value#hash=value')
+
+  expect(combineUrl('/path')).toEqual({ url: '/path', pathname: '/path', search: '', searchParams: {}, hash: '', hashParams: {} })
+  expect(combineUrl('/path?a=b#hash=value')).toEqual({ url: '/path?a=b#hash=value', pathname: '/path', search: '?a=b', searchParams: { a: 'b' }, hash: '#hash=value', hashParams: { hash: 'value' } })
+
 })

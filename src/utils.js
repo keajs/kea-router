@@ -106,7 +106,16 @@ export function parsePath (path) {
   }
 }
 
-export function combineUrl (url, searchInput, hashInput, encodeParams = getPluginContext('router').encodeParams, decodeParams = getPluginContext('router').decodeParams) {
+const _e = encodeParams
+const _d = decodeParams
+
+export function combineUrl (
+  url,
+  searchInput,
+  hashInput,
+  encodeParams = getPluginContext('router').encodeParams || _e,
+  decodeParams = getPluginContext('router').decodeParams || _d
+) {
   const parsedPath = parsePath(url)
 
   let response = {
