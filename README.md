@@ -31,4 +31,4 @@ You may add extra options with `routerPlugin(options)`, see the source for more 
 
 ## Sample usage
 
-[Read the documentation](https://kea.js.org/plugins/router)
+[Read the documentation](https://kea.js.org/docs/plugins/router)
