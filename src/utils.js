@@ -28,7 +28,7 @@ function serializeValue (value) {
   return value
 }
 
-export function decodeParams (input, symbol) {
+export function decodeParams (input, symbol = '') {
   if (symbol && input.indexOf(symbol) === 0) {
     input = input.slice(1)
   }
@@ -52,7 +52,7 @@ export function decodeParams (input, symbol) {
   return ret
 }
 
-export function encodeParams (obj, symbol) {
+export function encodeParams (obj, symbol = '') {
   if (typeof obj !== 'object') {
     return ''
   }
@@ -77,7 +77,7 @@ export function stringOrObjectToString (input, symbol) {
 
   return typeof input === 'object'
     ? encodeParams(input, symbol)
-    : (input.indexOf(symbol) === 0 ? input : '?' + input)
+    : (input.indexOf(symbol) === 0 ? input : symbol + input)
 }
 
 // copied from react-router! :)

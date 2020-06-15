@@ -5,6 +5,13 @@ As we're at the 0.x phase, deprecations and breaking changes will still happen. 
 
 Once we react 1.0 all deprecations will be removed and the project will switch to SemVer.
 
+## 0.4.0 - 2020-06-15
+- Works with passing objects (`{}`) to `actionsToUrl` and `urlToActions`. Passing
+  functions (`() => ({})`) no longer strictly needed.
+
+## 0.3.0 - 2020-05-07
+- Support for url parameters
+
 ## 0.1.2 - 2020-03-25
 ### Changed
 - Don't change the URL if actionToUrl returns undefined

@@ -137,7 +137,7 @@ test('encode and decode for search and hash', async () => {
     reducers: ({ actions }) => ({
     }),
 
-    urlToAction: ({ actions }) => ({
+    urlToAction: {
       '/pages/:id': ({ id }, search, hash) => {
         if (id === 'first') {
           expect(search).toEqual({ query: 'string' })
@@ -161,12 +161,12 @@ test('encode and decode for search and hash', async () => {
 
         evaluatedUrl += 1
       }
-    }),
+    },
 
-    actionToUrl: ({ actions }) => ({
+    actionToUrl: {
       third: () => ['/pages/third', { search: 'ishere' }, { hash: 'isalsohere' }],
       sixth: () => ['/pages/sixth', '?search=inline', '#hash=alsoinline']
-    })
+    }
   })
 
   const unmount = logic.mount()

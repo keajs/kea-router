@@ -10,20 +10,19 @@ Router plugin for kea. Works with kea `1.0.0` and up.
 
 ## Installation
 
-`kea-router` depends on `kea-listeners`, so you must add both.
+Install the package: 
 
 ```sh
-yarn add kea-router kea-listener
+yarn add kea-router
 ```
 
-Add them to the plugins list when resetting the context:
+Add the plugin to the list when resetting the context:
 
 ```js
 import { routerPlugin } from 'kea-router'
-import listenersPlugin from 'kea-listeners'
 
 resetContext({
-  plugins: [listenersPlugin, routerPlugin]
+  plugins: [routerPlugin]
 })
 ```
 

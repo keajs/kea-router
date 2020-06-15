@@ -55,7 +55,7 @@ export function routerPlugin ({
             const listeners = {}
 
             if (input.urlToAction) {
-              const urlToActionMapping = input.urlToAction(logic)
+              const urlToActionMapping = typeof input.urlToAction === 'function' ? input.urlToAction(logic) : input.urlToAction
               const routes = Object.keys(urlToActionMapping).map(pathFromRoutes => ({
                 path: pathFromRoutes,
                 pattern: new UrlPattern(pathFromRoutes),
@@ -82,7 +82,8 @@ export function routerPlugin ({
             }
 
             if (input.actionToUrl) {
-              for (const [actionKey, urlMapping] of Object.entries(input.actionToUrl(logic))) {
+              const actionToUrl = typeof input.actionToUrl === 'function' ? input.actionToUrl(logic) : input.actionToUrl
+              for (const [actionKey, urlMapping] of Object.entries(actionToUrl)) {
                 listeners[actionKey] = function (payload) {
                   const { pathname, search, hash } = logic.values.__routerLocation
                   const currentPathInWindow = pathname + search + hash
