@@ -15,7 +15,7 @@
   },
   "homepage": "https://github.com/keajs/kea-router#readme",
   "scripts": {
-    "build": "rollup -c",
+    "build": "kea-typegen write && rollup -c",
     "watch": "rollup -cw",
     "lint": "eslint src/**",
     "prepublish": "npm run test && npm run build",
@@ -36,7 +36,7 @@
     ]
   },
   "peerDependencies": {
-    "kea": ">= 1.0.0"
+    "kea": ">= 2.2.1"
   },
   "devDependencies": {
     "@babel/cli": "^7.8.4",
@@ -60,6 +60,13 @@
     "@babel/polyfill": "^7.8.7",
     "@babel/preset-env": "^7.9.6",
     "@babel/preset-react": "^7.9.4",
+    "@babel/preset-typescript": "^7.8.3",
+    "@types/jest": "^24.0.25",
+    "@types/mocha": "^5.2.7",
+    "@types/react": "^16.9.43",
+    "@types/react-redux": "^7.1.9",
+    "@typescript-eslint/eslint-plugin": "^3.6.1",
+    "@typescript-eslint/parser": "^3.6.1",
     "babel-core": "^7.0.0-bridge.0",
     "babel-eslint": "^10.1.0",
     "babel-jest": "^26.0.1",
@@ -68,16 +75,19 @@
     "enzyme": "^3.11.0",
     "enzyme-adapter-react-16": "^1.15.2",
     "eslint": "^6.8.0",
+    "eslint-config-prettier": "^6.9.0",
     "eslint-config-standard": "^14.1.1",
     "eslint-plugin-import": "^2.20.2",
     "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^3.1.2",
     "eslint-plugin-promise": "^4.1.1",
     "eslint-plugin-react": "^7.19.0",
     "eslint-plugin-standard": "^4.0.0",
     "jest": "^26.0.1",
     "jest-environment-node-debug": "^2.0.0",
     "jsdom": "^16.2.2",
-    "kea": "^2.0.0-beta.5",
+    "kea": "^2.2.2",
+    "kea-typegen": "^0.3.4",
     "prop-types": "^15.7.2",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
@@ -88,7 +98,10 @@
     "rollup": "^2.8.2",
     "rollup-plugin-babel": "^4.4.0",
     "rollup-plugin-commonjs": "^10.1.0",
-    "rollup-plugin-node-resolve": "^5.2.0"
+    "rollup-plugin-dts": "^1.4.9",
+    "rollup-plugin-node-resolve": "^5.2.0",
+    "rollup-plugin-typescript2": "^0.27.1",
+    "typescript": "^4.0.5"
   },
   "dependencies": {
     "url-pattern": "^1.0.3"

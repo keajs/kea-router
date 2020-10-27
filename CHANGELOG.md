@@ -5,6 +5,10 @@ As we're at the 0.x phase, deprecations and breaking changes will still happen. 
 
 Once we react 1.0 all deprecations will be removed and the project will switch to SemVer.
 
+## 0.5.0 - 2020-10-27
+- Requires Kea 2.2.1 to work
+- Added types
+
 ## 0.4.0 - 2020-06-15
 - Works with passing objects (`{}`) to `actionsToUrl` and `urlToActions`. Passing
   functions (`() => ({})`) no longer strictly needed.
