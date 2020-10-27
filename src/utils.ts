@@ -1,15 +1,15 @@
 import { getPluginContext } from 'kea'
 
-function parseValue (value) {
-  if (!Number.isNaN(Number(value)) && (typeof value === 'string' && value.trim() !== '')) {
-    value = Number(value)
+function parseValue(value: string | null): any {
+  if (!Number.isNaN(Number(value)) && typeof value === 'string' && value.trim() !== '') {
+    return Number(value)
   } else if (value !== null && (value.toLowerCase() === 'true' || value.toLowerCase() === 'false')) {
-    value = value.toLowerCase() === 'true'
-  } else if (value.length >= 2 && (value.match(/^\[.*\] +$/) || value.match(/^\{.*\} +$/))) {
-    value = value.substring(0, value.length - 1)
-  } else if (value.length >= 2 && (value.match(/^\[.*\]$/) || value.match(/^\{.*\}$/))) {
+    return value.toLowerCase() === 'true'
+  } else if (value !== null && value.length >= 2 && (value.match(/^\[.*\] +$/) || value.match(/^\{.*\} +$/))) {
+    return value.substring(0, value.length - 1)
+  } else if (value !== null && value.length >= 2 && (value.match(/^\[.*\]$/) || value.match(/^\{.*\}$/))) {
     try {
-      value = JSON.parse(value)
+      return JSON.parse(value)
     } catch (e) {
       // well, damn
     }
@@ -18,7 +18,7 @@ function parseValue (value) {
   return value
 }
 
-function serializeValue (value) {
+function serializeValue(value: any): string {
   if (typeof value === 'object') {
     value = JSON.stringify(value)
   } else if (typeof value === 'string' && (value.match(/^\[.*\] *$/) || value.match(/^\{.*\} *$/))) {
@@ -28,7 +28,7 @@ function serializeValue (value) {
   return value
 }
 
-export function decodeParams (input, symbol = '') {
+export function decodeParams(input: string, symbol: string = ''): Record<string, any> {
   if (symbol && input.indexOf(symbol) === 0) {
     input = input.slice(1)
   }
@@ -52,47 +52,54 @@ export function decodeParams (input, symbol = '') {
   return ret
 }
 
-export function encodeParams (obj, symbol = '') {
+export function encodeParams(obj: Record<string, any>, symbol: string = ''): string {
   if (typeof obj !== 'object') {
     return ''
   }
-  const string = Object.keys(obj).map(key => {
-    let value = obj[key]
-    if (typeof value === 'undefined') {
-      return ''
-    }
-    if (value === null) {
-      return encodeURIComponent(key)
-    }
-    return encodeURIComponent(key) + '=' + encodeURIComponent(serializeValue(value))
-  }).filter(k => k.length !== 0).join('&')
+  const string = Object.keys(obj)
+    .map((key) => {
+      const value = obj[key]
+      if (typeof value === 'undefined') {
+        return ''
+      }
+      if (value === null) {
+        return encodeURIComponent(key)
+      }
+      return encodeURIComponent(key) + '=' + encodeURIComponent(serializeValue(value))
+    })
+    .filter((k) => k.length !== 0)
+    .join('&')
 
   return string.length > 0 ? symbol + string : ''
 }
 
-export function stringOrObjectToString (input, symbol) {
+export function stringOrObjectToString(input: any, symbol: string): string {
   if (!input) {
     return ''
   }
 
-  return typeof input === 'object'
-    ? encodeParams(input, symbol)
-    : (input.indexOf(symbol) === 0 ? input : symbol + input)
+  return typeof input === 'object' ? encodeParams(input, symbol) : input.indexOf(symbol) === 0 ? input : symbol + input
 }
 
 // copied from react-router! :)
-export function parsePath (path) {
+export function parsePath(
+  path: string,
+): {
+  pathname: string
+  search: string
+  hash: string
+} {
   let pathname = path || '/'
   let search = ''
   let hash = ''
-  let hashIndex = pathname.indexOf('#')
+  const hashIndex = pathname.indexOf('#')
 
   if (hashIndex !== -1) {
     hash = pathname.substr(hashIndex)
     pathname = pathname.substr(0, hashIndex)
   }
 
-  let searchIndex = pathname.indexOf('?')
+  const searchIndex = pathname.indexOf('?')
 
   if (searchIndex !== -1) {
     search = pathname.substr(searchIndex)
@@ -102,28 +109,36 @@ export function parsePath (path) {
   return {
     pathname: pathname,
     search: search === '?' ? '' : search,
-    hash: hash === '#' ? '' : hash
+    hash: hash === '#' ? '' : hash,
   }
 }
 
 const _e = encodeParams
 const _d = decodeParams
 
-export function combineUrl (
-  url,
-  searchInput,
-  hashInput,
-  encodeParams = getPluginContext('router').encodeParams || _e,
-  decodeParams = getPluginContext('router').decodeParams || _d
-) {
+export function combineUrl(
+  url: string,
+  searchInput: string | Record<string, any>,
+  hashInput: string | Record<string, any>,
+  encodeParams: (obj: Record<string, any>, symbol: string) => string = getPluginContext('router').encodeParams || _e,
+  decodeParams: (input: string, symbol: string) => Record<string, any> = getPluginContext('router').decodeParams || _d,
+): {
+  pathname: string
+  search: string
+  searchParams: Record<string, any>
+  hash: string
+  hashParams: Record<string, any>
+  url: string
+} {
   const parsedPath = parsePath(url)
 
-  let response = {
+  const response = {
     pathname: parsedPath.pathname,
-    search: undefined, // set below
+    search: '', // set below
     searchParams: decodeParams(parsedPath.search, '?'),
-    hash: undefined, // set below
-    hashParams: decodeParams(parsedPath.hash, '#')
+    hash: '', // set below
+    hashParams: decodeParams(parsedPath.hash, '#'),
+    url: '',
   }
 
   if (typeof searchInput === 'object') {
