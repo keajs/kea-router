@@ -4709,10 +4709,10 @@ jsx-ast-utils@^2.2.3:
     array-includes "^3.0.3"
     object.assign "^4.1.0"
 
-kea-typegen@^0.3.4:
-  version "0.3.4"
-  resolved "https://registry.yarnpkg.com/kea-typegen/-/kea-typegen-0.3.4.tgz#ec9b36272b3bb1b2a9596ab4d53ecc2907fe81a8"
-  integrity sha512-EBFxmF2JgS1MqjN16Uo9LSTqAaYR372jhw19isfaYIjPkn6DAItZ/BqZ4RubXAyVcvXXUjnIUifPsnKAQ5fwGw==
+kea-typegen@^0.3.5:
+  version "0.3.5"
+  resolved "https://registry.yarnpkg.com/kea-typegen/-/kea-typegen-0.3.5.tgz#9fbaf33af0ac0293fd9e6a73980bbc31baa83875"
+  integrity sha512-qPsj8hGSzo/nj5Ehdrwu0+xN7jc1WUL47tsM7yuJv/onNYQKOURb42yT9OMR4AqbBx4p6BfL2pqaNvrqwRnsFA==
   dependencies:
     "@wessberg/ts-clone-node" "0.3.8"
     prettier "^2.0.5"

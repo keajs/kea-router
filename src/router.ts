@@ -24,12 +24,12 @@ export const router = kea<routerType>({
   path: () => ['kea', 'router'],
 
   actions: () => ({
-    push: (url: string, searchInput: string | Record<string, any>, hashInput: string | Record<string, any>) => ({
+    push: (url: string, searchInput?: string | Record<string, any>, hashInput?: string | Record<string, any>) => ({
       url,
       searchInput,
       hashInput,
     }),
-    replace: (url: string, searchInput: string | Record<string, any>, hashInput: string | Record<string, any>) => ({
+    replace: (url: string, searchInput?: string | Record<string, any>, hashInput?: string | Record<string, any>) => ({
       url,
       searchInput,
       hashInput,
