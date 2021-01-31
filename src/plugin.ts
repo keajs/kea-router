@@ -3,7 +3,7 @@ import UrlPattern from 'url-pattern'
 
 import { router } from './router'
 import { encodeParams as encode, decodeParams as decode, stringOrObjectToString } from './utils'
-import { RouterPluginContext } from './types'
+import { RouterPluginContext, UrlPatternOptions } from './types'
 
 const memoryHistroy = {
   pushState(state, _, url) {},
@@ -17,6 +17,7 @@ export function routerPlugin({
   pathFromWindowToRoutes = (path: string) => path,
   encodeParams = encode,
   decodeParams = decode,
+  urlPatternOptions = {},
 }: {
   history?: undefined,
   location?: undefined,
@@ -24,6 +25,7 @@ export function routerPlugin({
   pathFromWindowToRoutes?: (path: string) => string,
   encodeParams?: (obj: Record<string, any>, symbol: string) => string,
   decodeParams?: (input: string, symbol: string) => Record<string, any>,
+  urlPatternOptions?: UrlPatternOptions
 } = {}): KeaPlugin {
   const history = _history || (typeof window !== 'undefined' ? window.history : memoryHistroy)
   const location = _location || (typeof window !== 'undefined' ? window.location : {})
@@ -67,7 +69,7 @@ export function routerPlugin({
                 typeof input.urlToAction === 'function' ? input.urlToAction(logic) : input.urlToAction
               const routes = Object.keys(urlToActionMapping).map((pathFromRoutes) => ({
                 path: pathFromRoutes,
-                pattern: new UrlPattern(pathFromRoutes),
+                pattern: new UrlPattern(pathFromRoutes, urlPatternOptions),
                 action: urlToActionMapping[pathFromRoutes],
               }))
 
