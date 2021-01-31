@@ -11,19 +11,21 @@ test('urlToAction and actionToUrl work', async () => {
   const location = {
     pathname: '/pages/first',
     search: '',
-    hash: ''
+    hash: '',
   }
 
   const history = {
-    pushState (state, _, url) { Object.assign(location, parsePath(url)) },
-    replaceState (state, _, url) { Object.assign(location, parsePath(url)) }
+    pushState(state, _, url) {
+      Object.assign(location, parsePath(url))
+    },
+    replaceState(state, _, url) {
+      Object.assign(location, parsePath(url))
+    },
   }
 
   resetContext({
-    plugins: [
-      routerPlugin({ history, location })
-    ],
-    createStore: { middleware: [] }
+    plugins: [routerPlugin({ history, location })],
+    createStore: { middleware: [] },
   })
 
   const logic = kea({
@@ -32,19 +34,25 @@ test('urlToAction and actionToUrl work', async () => {
       second: true,
       page: (page) => ({ page }),
       list: true,
-      url: (opt1, opt2) => ({ opt1, opt2 })
+      url: (opt1, opt2) => ({ opt1, opt2 }),
     }),
 
     reducers: ({ actions }) => ({
-      activePage: [null, {
-        [actions.first]: () => 'first',
-        [actions.second]: () => 'second',
-        [actions.page]: (_, payload) => payload.page,
-        [actions.list]: () => null
-      }],
-      opts: [{}, {
-        [actions.url]: (_, payload) => payload
-      }]
+      activePage: [
+        null,
+        {
+          [actions.first]: () => 'first',
+          [actions.second]: () => 'second',
+          [actions.page]: (_, payload) => payload.page,
+          [actions.list]: () => null,
+        },
+      ],
+      opts: [
+        {},
+        {
+          [actions.url]: (_, payload) => payload,
+        },
+      ],
     }),
 
     urlToAction: ({ actions }) => ({
@@ -52,15 +60,15 @@ test('urlToAction and actionToUrl work', async () => {
       '/pages/second': () => actions.second(),
       '/pages/:page': ({ page }) => actions.page(page),
       '/pages': ({ page }) => actions.list(),
-      '/url(/:opt1)(/:opt2)': ({ opt1, opt2 }) => actions.url(opt1, opt2)
+      '/url(/:opt1)(/:opt2)': ({ opt1, opt2 }) => actions.url(opt1, opt2),
     }),
 
     actionToUrl: ({ actions }) => ({
       [actions.first]: () => '/pages/first',
       second: () => '/pages/second',
       [actions.page]: ({ page }) => `/pages/${page}`,
-      [actions.list]: () => `/pages`
-    })
+      [actions.list]: () => `/pages`,
+    }),
   })
 
   const unmount = logic.mount()
@@ -105,19 +113,21 @@ test('encode and decode for search and hash', async () => {
   const location = {
     pathname: '/pages/first',
     search: '?query=string',
-    hash: '#hash=stuff'
+    hash: '#hash=stuff',
   }
 
   const history = {
-    pushState (state, _, url) { Object.assign(location, parsePath(url)) },
-    replaceState (state, _, url) { Object.assign(location, parsePath(url)) }
+    pushState(state, _, url) {
+      Object.assign(location, parsePath(url))
+    },
+    replaceState(state, _, url) {
+      Object.assign(location, parsePath(url))
+    },
   }
 
   resetContext({
-    plugins: [
-      routerPlugin({ history, location })
-    ],
-    createStore: { middleware: [] }
+    plugins: [routerPlugin({ history, location })],
+    createStore: { middleware: [] },
   })
 
   expect(router.values.searchParams).toEqual({ query: 'string' })
@@ -131,11 +141,10 @@ test('encode and decode for search and hash', async () => {
       first: true,
       second: true,
       third: true,
-      sixth: true
+      sixth: true,
     }),
 
-    reducers: ({ actions }) => ({
-    }),
+    reducers: ({ actions }) => ({}),
 
     urlToAction: {
       '/pages/:id': ({ id }, search, hash) => {
@@ -160,13 +169,13 @@ test('encode and decode for search and hash', async () => {
         }
 
         evaluatedUrl += 1
-      }
+      },
     },
 
     actionToUrl: {
       third: () => ['/pages/third', { search: 'ishere' }, { hash: 'isalsohere' }],
-      sixth: () => ['/pages/sixth', '?search=inline', '#hash=alsoinline']
-    }
+      sixth: () => ['/pages/sixth', '?search=inline', '#hash=alsoinline'],
+    },
   })
 
   const unmount = logic.mount()
@@ -176,7 +185,9 @@ test('encode and decode for search and hash', async () => {
   expect(router.values.hashParams).toEqual({ hash: 'stuff' })
   expect(evaluatedUrl).toBe(1)
 
-  router.actions.push(`/pages/second?key=value&obj=${encodeURIComponent(JSON.stringify({ a: 'b' }))}&bool=true&number=3.14#hashishere`)
+  router.actions.push(
+    `/pages/second?key=value&obj=${encodeURIComponent(JSON.stringify({ a: 'b' }))}&bool=true&number=3.14#hashishere`,
+  )
 
   expect(router.values.searchParams).toEqual({ key: 'value', obj: { a: 'b' }, bool: true, number: 3.14 })
   expect(router.values.hashParams).toEqual({ hashishere: null })
@@ -202,7 +213,11 @@ test('encode and decode for search and hash', async () => {
 
   expect(evaluatedUrl).toBe(4)
 
-  router.actions.push(`/pages/fifth?key=value&foo=bar#hashishere&morehash=true`, { key: 'meh', otherKey: 'value' }, { morehash: false })
+  router.actions.push(
+    `/pages/fifth?key=value&foo=bar#hashishere&morehash=true`,
+    { key: 'meh', otherKey: 'value' },
+    { morehash: false },
+  )
 
   expect(location.pathname).toBe('/pages/fifth')
   expect(location.search).toBe('?key=meh&foo=bar&otherKey=value')
@@ -223,4 +238,107 @@ test('encode and decode for search and hash', async () => {
   expect(evaluatedUrl).toBe(6)
 
   unmount()
+})
+
+test('urlPatternOptions', async () => {
+  const location = {
+    pathname: '/pages/me@gmail.com',
+    search: '',
+    hash: '',
+  }
+
+  const history = {
+    pushState(state, _, url) {
+      Object.assign(location, parsePath(url))
+    },
+    replaceState(state, _, url) {
+      Object.assign(location, parsePath(url))
+    },
+  }
+
+  const logic = kea({
+    actions: () => ({
+      page: (page) => ({ page }),
+      list: true,
+    }),
+
+    reducers: ({ actions }) => ({
+      activePage: [
+        null,
+        {
+          page: (_, payload) => payload.page,
+          list: () => null,
+        },
+      ],
+    }),
+
+    urlToAction: ({ actions }) => ({
+      '/pages/:page': ({ page }) => actions.page(page),
+      '/pages': () => actions.list(),
+    }),
+
+    actionToUrl: ({ actions }) => ({
+      [actions.page]: ({ page }) => `/pages/${page}`,
+      [actions.list]: () => `/pages`,
+    }),
+  })
+
+  // TEST 1
+
+  location.pathname = '/pages/me@gmail.com'
+
+  resetContext({
+    plugins: [
+      routerPlugin({
+        history,
+        location,
+        urlPatternOptions: {
+          // default: 'a-zA-Z0-9-_~ %'
+        },
+      }),
+    ],
+    createStore: { middleware: [] },
+  })
+
+  logic.mount()
+
+  expect(location.pathname).toBe('/pages/me@gmail.com')
+  expect(logic.values.activePage).toBe(null)
+
+  logic.actions.page('me@gmail.com')
+
+  expect(location.pathname).toBe('/pages/me@gmail.com')
+  expect(logic.values.activePage).toBe('me@gmail.com')
+
+  // TEST 2
+
+  location.pathname = '/pages/me@gmail.com'
+
+  resetContext({
+    plugins: [
+      routerPlugin({
+        history,
+        location,
+        urlPatternOptions: {
+          segmentValueCharset: 'a-zA-Z0-9-_~ %.@', // adds '@' to default
+        },
+      }),
+    ],
+    createStore: { middleware: [] },
+  })
+
+  logic.mount()
+
+  expect(location.pathname).toBe('/pages/me@gmail.com')
+  expect(logic.values.activePage).toBe('me@gmail.com')
+
+  logic.actions.page('me@gmail.com')
+
+  expect(location.pathname).toBe('/pages/me@gmail.com')
+  expect(logic.values.activePage).toBe('me@gmail.com')
+
+  logic.actions.list()
+
+  expect(location.pathname).toBe('/pages')
+  expect(logic.values.activePage).toBe(null)
 })
