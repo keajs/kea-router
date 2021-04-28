@@ -17,3 +17,4 @@ Usage:
 export { router } from './router'
 export { routerPlugin } from './plugin'
 export { encodeParams, decodeParams, combineUrl } from './utils'
+export { A } from './anchor'

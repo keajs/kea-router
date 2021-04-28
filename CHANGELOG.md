@@ -6,6 +6,10 @@ As we're at the 0.x phase, deprecations and breaking changes will still happen. 
 
 Once we react 1.0 all deprecations will be removed and the project will switch to SemVer.
 
+## 0.5.3 - 2021-04-28
+
+- Add `<A href='/url'>text</A>` tag which hijacks `onClick` and delegates the rest to an `<a>` tag. 
+
 ## 0.5.2 - 2020-10-27
 
 - Adds `urlPatternOptions` to `routerPlugin` options. Use the following to match emails in url segments:
