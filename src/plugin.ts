@@ -104,7 +104,7 @@ export function routerPlugin({
               const actionToUrl = typeof input.actionToUrl === 'function' ? input.actionToUrl(logic) : input.actionToUrl
               for (const [actionKey, urlMapping] of Object.entries(actionToUrl) as [
                 string,
-                (payload: Record<string, any>) => string,
+                (payload: Record<string, any>) => string | void,
               ][]) {
                 listeners[actionKey] = function (payload: Record<string, any>) {
                   const { pathname, search, hash } = logic.values.__routerLocation
