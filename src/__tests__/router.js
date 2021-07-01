@@ -109,6 +109,75 @@ test('urlToAction and actionToUrl work', async () => {
   unmount()
 })
 
+test('replace: true', async () => {
+  const locations = [
+    {
+      pathname: '/pages/first',
+      search: '',
+      hash: '',
+    },
+  ]
+  const location = { ...locations[0] }
+
+  const history = {
+    pushState(state, _, url) {
+      locations.push(parsePath(url))
+      Object.assign(location, locations[location.length - 1])
+    },
+    replaceState(state, _, url) {
+      if (locations.length > 0) {
+        locations[locations.length - 1] = parsePath(url)
+      } else {
+        locations.push(parsePath(url))
+      }
+      Object.assign(location, locations[location.length - 1])
+    },
+  }
+
+  resetContext({
+    plugins: [routerPlugin({ history, location })],
+    createStore: { middleware: [] },
+  })
+
+  const logic = kea({
+    actions: () => ({
+      push: true,
+      replace: true,
+    }),
+
+    actionToUrl: {
+      push: () => '/pages/push',
+      replace: () => ['/pages/replace', undefined, undefined, { replace: true }],
+    },
+  })
+
+  const unmount = logic.mount()
+
+  expect(locations.length).toBe(1)
+  expect(locations[0].pathname).toBe('/pages/first')
+
+  logic.actions.push()
+
+  expect(locations.length).toBe(2)
+  expect(locations[0].pathname).toBe('/pages/first')
+  expect(locations[1].pathname).toBe('/pages/push')
+
+  logic.actions.replace()
+
+  expect(locations.length).toBe(2)
+  expect(locations[0].pathname).toBe('/pages/first')
+  expect(locations[1].pathname).toBe('/pages/replace')
+
+  logic.actions.push()
+
+  expect(locations.length).toBe(3)
+  expect(locations[0].pathname).toBe('/pages/first')
+  expect(locations[1].pathname).toBe('/pages/replace')
+  expect(locations[2].pathname).toBe('/pages/push')
+
+  unmount()
+})
+
 test('encode and decode for search and hash', async () => {
   const location = {
     pathname: '/pages/first',
