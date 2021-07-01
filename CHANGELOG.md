@@ -2,9 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
-As we're at the 0.x phase, deprecations and breaking changes will still happen. They will be documented here.
-
-Once we react 1.0 all deprecations will be removed and the project will switch to SemVer.
+## 1.0.0 - 2021-07-01
+- This library is stable enough, bumping to 1.0! :tada:
+- Add option to return `{ replace: true }` as the 4th array element from `actionToUrl`, which will `replace` 
+  the last location in the stack instead of `push`ing a new one.  
 
 ## 0.5.3 - 2021-04-28
 
