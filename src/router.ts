@@ -70,13 +70,13 @@ export const router = kea<routerType>({
       },
     ],
     searchParams: [
-      (getRouterContext()).decodeParams(getLocationFromContext().search, '?'),
+      getRouterContext().decodeParams(getLocationFromContext().search, '?'),
       {
         locationChanged: (_, { searchParams }) => searchParams,
       },
     ],
     hashParams: [
-      (getRouterContext()).decodeParams(getLocationFromContext().hash, '#'),
+      getRouterContext().decodeParams(getLocationFromContext().hash, '#'),
       {
         locationChanged: (_, { hashParams }) => hashParams,
       },

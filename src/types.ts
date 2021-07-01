@@ -18,3 +18,11 @@ export interface UrlPatternOptions {
   optionalSegmentEndChar?: string
   wildcardChar?: string
 }
+
+export type ActionToUrlReturn =
+  | void
+  | string
+  | [string]
+  | [string, string | Record<string, any> | undefined]
+  | [string, string | Record<string, any> | undefined, string | Record<string, any> | undefined]
+  | [string, string | Record<string, any> | undefined, string | Record<string, any> | undefined, { replace?: boolean }]

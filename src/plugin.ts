@@ -1,9 +1,9 @@
-import { getContext, KeaPlugin, setPluginContext} from 'kea'
+import { getContext, KeaPlugin, setPluginContext } from 'kea'
 import UrlPattern from 'url-pattern'
 
 import { router } from './router'
 import { encodeParams as encode, decodeParams as decode, stringOrObjectToString } from './utils'
-import { RouterPluginContext, UrlPatternOptions } from './types'
+import { ActionToUrlReturn, RouterPluginContext, UrlPatternOptions } from './types'
 
 const memoryHistroy = {
   pushState(state, _, url) {},
@@ -19,12 +19,12 @@ export function routerPlugin({
   decodeParams = decode,
   urlPatternOptions = {},
 }: {
-  history?: undefined,
-  location?: undefined,
-  pathFromRoutesToWindow?: (path: string) => string,
-  pathFromWindowToRoutes?: (path: string) => string,
-  encodeParams?: (obj: Record<string, any>, symbol: string) => string,
-  decodeParams?: (input: string, symbol: string) => Record<string, any>,
+  history?: undefined
+  location?: undefined
+  pathFromRoutesToWindow?: (path: string) => string
+  pathFromWindowToRoutes?: (path: string) => string
+  encodeParams?: (obj: Record<string, any>, symbol: string) => string
+  decodeParams?: (input: string, symbol: string) => Record<string, any>
   urlPatternOptions?: UrlPatternOptions
 } = {}): KeaPlugin {
   const history = _history || (typeof window !== 'undefined' ? window.history : memoryHistroy)
@@ -57,11 +57,10 @@ export function routerPlugin({
 
         logic.extend({
           connect: {
-            actions: [router, ['push as __routerPush', 'locationChanged as __routerLocationChanged']],
-            values: [router, ['location as __routerLocation']],
+            logic: [router],
           },
 
-          listeners: ({ actions, actionTypes }) => {
+          listeners: () => {
             const listeners: Record<string, any> = {}
 
             if (input.urlToAction) {
@@ -73,7 +72,7 @@ export function routerPlugin({
                 action: urlToActionMapping[pathFromRoutes],
               }))
 
-              listeners[actionTypes.__routerLocationChanged] = function ({
+              listeners[router.actionTypes.locationChanged] = function ({
                 pathname,
                 searchParams,
                 hashParams,
@@ -104,10 +103,10 @@ export function routerPlugin({
               const actionToUrl = typeof input.actionToUrl === 'function' ? input.actionToUrl(logic) : input.actionToUrl
               for (const [actionKey, urlMapping] of Object.entries(actionToUrl) as [
                 string,
-                (payload: Record<string, any>) => string | void,
+                (payload: Record<string, any>) => ActionToUrlReturn,
               ][]) {
                 listeners[actionKey] = function (payload: Record<string, any>) {
-                  const { pathname, search, hash } = logic.values.__routerLocation
+                  const { pathname, search, hash } = router.values.location
                   const currentPathInWindow = pathname + search + hash
 
                   const pathInRoutes = urlMapping(payload)
@@ -123,7 +122,11 @@ export function routerPlugin({
                     : pathFromRoutesToWindow(pathInRoutes)
 
                   if (currentPathInWindow !== pathInWindow) {
-                    actions.__routerPush(pathInWindow)
+                    if (Array.isArray(pathInRoutes) && pathInRoutes[3]?.replace) {
+                      router.actions.replace(pathInWindow)
+                    } else {
+                      router.actions.push(pathInWindow)
+                    }
                   }
                 }
               }
@@ -132,22 +135,25 @@ export function routerPlugin({
             return listeners
           },
 
-          events: ({ actions, listeners, cache }) => ({
+          events: ({ listeners, cache }) => ({
             afterMount() {
-              const locationChanged = actions.__routerLocationChanged
+              const locationChanged = router.actionTypes.locationChanged
               if (listeners && listeners[locationChanged] && cache.__routerListeningToLocation) {
                 const previousState = getContext().store.getState()
                 listeners[locationChanged].forEach((listener) => {
-                  listener({
-                    type: locationChanged.toString(),
-                    payload: {
-                      ...router.values.location,
-                      searchParams: router.values.searchParams,
-                      hashParams: router.values.hashParams,
-                      method: 'POP',
-                      initial: true,
+                  listener(
+                    {
+                      type: locationChanged.toString(),
+                      payload: {
+                        ...router.values.location,
+                        searchParams: router.values.searchParams,
+                        hashParams: router.values.hashParams,
+                        method: 'POP',
+                        initial: true,
+                      },
                     },
-                  }, previousState)
+                    previousState,
+                  )
                 })
               }
             },
