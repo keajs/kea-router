@@ -122,7 +122,7 @@ export function routerPlugin({
                     : pathFromRoutesToWindow(pathInRoutes)
 
                   if (currentPathInWindow !== pathInWindow) {
-                    if (Array.isArray(pathInRoutes) && pathInRoutes[3]?.replace) {
+                    if (Array.isArray(pathInRoutes) && pathInRoutes[3] && pathInRoutes[3].replace) {
                       router.actions.replace(pathInWindow)
                     } else {
                       router.actions.push(pathInWindow)
