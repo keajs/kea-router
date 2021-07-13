@@ -118,8 +118,8 @@ const _d = decodeParams
 
 export function combineUrl(
   url: string,
-  searchInput: string | Record<string, any>,
-  hashInput: string | Record<string, any>,
+  searchInput: string | Record<string, any> | undefined,
+  hashInput: string | Record<string, any> | undefined,
   encodeParams: (obj: Record<string, any>, symbol: string) => string = getPluginContext('router').encodeParams || _e,
   decodeParams: (input: string, symbol: string) => Record<string, any> = getPluginContext('router').decodeParams || _d,
 ): {

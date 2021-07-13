@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.0.1 - 2021-07-13
+- Fix `combineUrl` util's type
+
 ## 1.0.0 - 2021-07-01
 - This library is stable enough, bumping to 1.0! :tada:
 - Add option to return `{ replace: true }` as the 4th array element from `actionToUrl`, which will `replace` 
