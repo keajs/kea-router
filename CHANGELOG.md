@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.0.2 - 2021-07-13
+- Fix `combineUrl` util's type's fix
+
 ## 1.0.1 - 2021-07-13
 - Fix `combineUrl` util's type
 
