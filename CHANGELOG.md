@@ -2,20 +2,27 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.0.3 - 2021-10-19
+
+- Fix package.json paths.
+
 ## 1.0.2 - 2021-07-13
+
 - Fix `combineUrl` util's type's fix
 
 ## 1.0.1 - 2021-07-13
+
 - Fix `combineUrl` util's type
 
 ## 1.0.0 - 2021-07-01
+
 - This library is stable enough, bumping to 1.0! :tada:
-- Add option to return `{ replace: true }` as the 4th array element from `actionToUrl`, which will `replace` 
-  the last location in the stack instead of `push`ing a new one.  
+- Add option to return `{ replace: true }` as the 4th array element from `actionToUrl`, which will `replace`
+  the last location in the stack instead of `push`ing a new one.
 
 ## 0.5.3 - 2021-04-28
 
-- Add `<A href='/url'>text</A>` tag which hijacks `onClick` and delegates the rest to an `<a>` tag. 
+- Add `<A href='/url'>text</A>` tag which hijacks `onClick` and delegates the rest to an `<a>` tag.
 
 ## 0.5.2 - 2020-10-27
 
