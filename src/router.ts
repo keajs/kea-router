@@ -1,7 +1,7 @@
 /* global window */
 import { kea, getPluginContext } from 'kea'
 import { combineUrl } from './utils'
-import { routerType } from '../types/routerType'
+import { routerType } from './routerType'
 import { RouterPluginContext } from './types'
 
 /*

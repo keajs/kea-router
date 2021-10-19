@@ -15,8 +15,7 @@
   },
   "homepage": "https://github.com/keajs/kea-router#readme",
   "scripts": {
-    "build": "kea-typegen write && rollup -c",
-    "watch": "rollup -cw",
+    "build": "kea-typegen write && tsc -b",
     "lint": "eslint src/**",
     "prepublishOnly": "npm run test && npm run build",
     "start": "npm run watch",
@@ -95,12 +94,6 @@
     "react-test-renderer": "^16.13.1",
     "redux": "^4.0.5",
     "reselect": "^4.0.0",
-    "rollup": "^2.8.2",
-    "rollup-plugin-babel": "^4.4.0",
-    "rollup-plugin-commonjs": "^10.1.0",
-    "rollup-plugin-dts": "^1.4.9",
-    "rollup-plugin-node-resolve": "^5.2.0",
-    "rollup-plugin-typescript2": "^0.27.1",
     "typescript": "^4.0.5"
   },
   "dependencies": {

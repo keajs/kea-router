@@ -67,3 +67,4 @@ typings/
 vendor
 
 types
+src/*Type.ts

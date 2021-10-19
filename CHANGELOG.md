@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.0.4 - 2021-10-19
+
+- Change build from `rollup` to `tsc`
+
 ## 1.0.3 - 2021-10-19
 
 - Fix package.json paths.
