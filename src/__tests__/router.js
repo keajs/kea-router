@@ -216,25 +216,113 @@ test('encode and decode for search and hash', async () => {
     reducers: ({ actions }) => ({}),
 
     urlToAction: {
-      '/pages/:id': ({ id }, search, hash) => {
+      '/pages/:id': ({ id }, search, hash, payload) => {
         if (id === 'first') {
           expect(search).toEqual({ query: 'string' })
           expect(hash).toEqual({ hash: 'stuff' })
+          expect(payload).toEqual({
+            hash: '#hash=stuff',
+            hashParams: {
+              hash: 'stuff',
+            },
+            initial: true,
+            method: 'POP',
+            pathname: '/pages/first',
+            search: '?query=string',
+            searchParams: {
+              query: 'string',
+            },
+          })
         } else if (id === 'second') {
           expect(search).toEqual({ key: 'value', obj: { a: 'b' }, bool: true, number: 3.14 })
           expect(hash).toEqual({ hashishere: null })
+          expect(payload).toEqual({
+            hash: '#hashishere',
+            hashParams: {
+              hashishere: null,
+            },
+            initial: false,
+            method: 'PUSH',
+            pathname: '/pages/second',
+            search: '?key=value&obj=%7B%22a%22%3A%22b%22%7D&bool=true&number=3.14',
+            searchParams: {
+              bool: true,
+              key: 'value',
+              number: 3.14,
+              obj: {
+                a: 'b',
+              },
+            },
+          })
         } else if (id === 'third') {
           expect(search).toEqual({ search: 'ishere' })
           expect(hash).toEqual({ hash: 'isalsohere' })
+          expect(payload).toEqual({
+            hash: '#hash=isalsohere',
+            hashParams: {
+              hash: 'isalsohere',
+            },
+            initial: false,
+            method: 'PUSH',
+            pathname: '/pages/third',
+            search: '?search=ishere',
+            searchParams: {
+              search: 'ishere',
+            },
+          })
         } else if (id === 'fourth') {
           expect(search).toEqual({ key: 'value', otherkey: 'value' })
           expect(hash).toEqual({ hashishere: null, morehash: false })
+          expect(payload).toEqual({
+            hash: '#hashishere&morehash=false',
+            hashParams: {
+              hashishere: null,
+              morehash: false,
+            },
+            initial: false,
+            method: 'PUSH',
+            pathname: '/pages/fourth',
+            search: '?key=value&otherkey=value',
+            searchParams: {
+              key: 'value',
+              otherkey: 'value',
+            },
+          })
         } else if (id === 'fifth') {
           expect(search).toEqual({ foo: 'bar', key: 'meh', otherKey: 'value' })
           expect(hash).toEqual({ hashishere: null, morehash: false })
+          expect(payload).toEqual({
+            hash: '#hashishere&morehash=false',
+            hashParams: {
+              hashishere: null,
+              morehash: false,
+            },
+            initial: false,
+            method: 'PUSH',
+            pathname: '/pages/fifth',
+            search: '?key=meh&foo=bar&otherKey=value',
+            searchParams: {
+              foo: 'bar',
+              key: 'meh',
+              otherKey: 'value',
+            },
+          })
         } else if (id === 'sixth') {
           expect(search).toEqual({ search: 'inline' })
           expect(hash).toEqual({ hash: 'alsoinline' })
+          expect(payload).toEqual({
+            hash: '#hash=alsoinline',
+            hashParams: {
+              hash: 'alsoinline',
+            },
+            initial: false,
+            method: 'PUSH',
+            pathname: '/pages/sixth',
+            search: '?search=inline',
+            searchParams: {
+              search: 'inline',
+            },
+          })
         }
 
         evaluatedUrl += 1

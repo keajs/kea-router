@@ -26,3 +26,14 @@ export type ActionToUrlReturn =
   | [string, string | Record<string, any> | undefined]
   | [string, string | Record<string, any> | undefined, string | Record<string, any> | undefined]
   | [string, string | Record<string, any> | undefined, string | Record<string, any> | undefined, { replace?: boolean }]
+
+export interface LocationChangedPayload {
+  method: 'PUSH' | 'REPLACE' | 'POP'
+  pathname: string
+  search: string
+  searchParams: Record<string, any>
+  hash: string
+  hashParams: Record<string, any>
+  url: string
+  initial?: boolean
+}

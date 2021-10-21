@@ -3,7 +3,7 @@ import UrlPattern from 'url-pattern'
 
 import { router } from './router'
 import { encodeParams as encode, decodeParams as decode, stringOrObjectToString } from './utils'
-import { ActionToUrlReturn, RouterPluginContext, UrlPatternOptions } from './types'
+import { ActionToUrlReturn, LocationChangedPayload, RouterPluginContext, UrlPatternOptions } from './types'
 
 const memoryHistroy = {
   pushState(state, _, url) {},
@@ -72,15 +72,8 @@ export function routerPlugin({
                 action: urlToActionMapping[pathFromRoutes],
               }))
 
-              listeners[router.actionTypes.locationChanged] = function ({
-                pathname,
-                searchParams,
-                hashParams,
-              }: {
-                pathname: string
-                searchParams: Record<string, any>
-                hashParams: Record<string, any>
-              }) {
+              listeners[router.actionTypes.locationChanged] = function (payload: LocationChangedPayload) {
+                const { pathname, searchParams, hashParams } = payload
                 const pathInWindow = decodeURI(pathname)
                 const pathInRoutes = pathFromWindowToRoutes(pathInWindow)
 
@@ -95,7 +88,7 @@ export function routerPlugin({
                   }
                 }
 
-                matchedRoute && matchedRoute.action(params, searchParams, hashParams)
+                matchedRoute && matchedRoute.action(params, searchParams, hashParams, payload)
               }
             }
 

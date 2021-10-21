@@ -2,7 +2,7 @@
 import { kea, getPluginContext } from 'kea'
 import { combineUrl } from './utils'
 import { routerType } from './routerType'
-import { RouterPluginContext } from './types'
+import { LocationChangedPayload, RouterPluginContext } from './types'
 
 /*
 Usage:
@@ -42,16 +42,7 @@ export const router = kea<routerType>({
       hash,
       hashParams,
       initial,
-    }: {
-      method: 'PUSH' | 'REPLACE' | 'POP'
-      pathname: string
-      search: string
-      searchParams: Record<string, any>
-      hash: string
-      hashParams: Record<string, any>
-      url: string
-      initial?: boolean
-    }) => ({
+    }: LocationChangedPayload) => ({
       method,
       pathname,
       search,
