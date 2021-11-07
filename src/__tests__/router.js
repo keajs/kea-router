@@ -85,26 +85,31 @@ test('urlToAction and actionToUrl work', async () => {
 
   expect(location.pathname).toBe('/pages/custom')
   expect(logic.values.activePage).toBe('custom')
+  expect(router.values.lastMethod).toBe('PUSH')
 
   logic.actions.list()
 
   expect(location.pathname).toBe('/pages')
   expect(logic.values.activePage).toBe(null)
+  expect(router.values.lastMethod).toBe('PUSH')
 
   router.actions.push('/url/a/b')
 
   expect(location.pathname).toBe('/url/a/b')
   expect(logic.values.opts).toEqual({ opt1: 'a', opt2: 'b' })
+  expect(router.values.lastMethod).toBe('PUSH')
 
   router.actions.push('/url/a')
 
   expect(location.pathname).toBe('/url/a')
   expect(logic.values.opts).toEqual({ opt1: 'a', opt2: undefined })
+  expect(router.values.lastMethod).toBe('PUSH')
 
   router.actions.replace('/url')
 
   expect(location.pathname).toBe('/url')
   expect(logic.values.opts).toEqual({ opt1: undefined, opt2: undefined })
+  expect(router.values.lastMethod).toBe('REPLACE')
 
   unmount()
 })

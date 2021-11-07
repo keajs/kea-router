@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.0.6 - 2021-11-07
+
+- Add `lastMethod` value to easily check if the back button was pressed (`POP`) or not (`PUSH` or `REPLACE`).
+
 ## 1.0.5 - 2021-10-21
 
 - Pass the payload of the `router.actions.locationChagned` action as the 4th parameter to `urlToAction`.

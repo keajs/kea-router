@@ -72,6 +72,12 @@ export const router = kea<routerType>({
         locationChanged: (_, { hashParams }) => hashParams,
       },
     ],
+    lastMethod: [
+      null as string | null,
+      {
+        locationChanged: (_, { method }) => method,
+      },
+    ],
   }),
 
   listeners: ({ sharedListeners }) => ({
