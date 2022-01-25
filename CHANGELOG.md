@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.0.7 - 2022-01-25
+
+- Add `currentLocation` selector to `router`, which contains both `search` and `searchParams` unlike `location` that doesn't contain the params.
+- Add `previousLocation` as the 5th argument to `urlToAction` functions. 
+
 ## 1.0.6 - 2021-11-07
 
 - Add `lastMethod` value to easily check if the back button was pressed (`POP`) or not (`PUSH` or `REPLACE`).

@@ -28,6 +28,9 @@ test('urlToAction and actionToUrl work', async () => {
     createStore: { middleware: [] },
   })
 
+  let shouldEqualFirst = null
+  let shouldEqualSecond = null
+
   const logic = kea({
     actions: () => ({
       first: true,
@@ -57,15 +60,21 @@ test('urlToAction and actionToUrl work', async () => {
 
     urlToAction: ({ actions }) => ({
       '/pages/first': () => actions.first(),
-      '/pages/second': () => actions.second(),
-      '/pages/:page': ({ page }) => actions.page(page),
+      '/pages/second': (_, __, ___, payload, previousLocation) => {
+        shouldEqualFirst = previousLocation
+        actions.second()
+      },
+      '/pages/:page': ({ page }, __, ___, payload, previousLocation) => {
+        shouldEqualSecond = previousLocation
+        actions.page(page)
+      },
       '/pages': ({ page }) => actions.list(),
       '/url(/:opt1)(/:opt2)': ({ opt1, opt2 }) => actions.url(opt1, opt2),
     }),
 
     actionToUrl: ({ actions }) => ({
       [actions.first]: () => '/pages/first',
-      second: () => '/pages/second',
+      second: () => '/pages/second?a=b',
       [actions.page]: ({ page }) => `/pages/${page}`,
       [actions.list]: () => `/pages`,
     }),
@@ -79,13 +88,24 @@ test('urlToAction and actionToUrl work', async () => {
   logic.actions.second()
 
   expect(location.pathname).toBe('/pages/second')
+  expect(location.search).toBe('?a=b')
+  expect(location.hash).toBe('')
   expect(logic.values.activePage).toBe('second')
+  expect(shouldEqualFirst.pathname).toBe('/pages/first')
+  expect(router.values.location.search).toBe('?a=b')
+  expect(router.values.searchParams).toEqual({ a: 'b' })
+  expect(shouldEqualFirst.method).toBe(null)
+  expect(shouldEqualFirst.searchParams).toEqual({})
 
   logic.actions.page('custom')
 
   expect(location.pathname).toBe('/pages/custom')
   expect(logic.values.activePage).toBe('custom')
   expect(router.values.lastMethod).toBe('PUSH')
+  expect(shouldEqualSecond.pathname).toBe('/pages/second')
+  expect(shouldEqualSecond.method).toBe('PUSH')
+  expect(shouldEqualSecond.search).toBe('?a=b')
+  expect(shouldEqualSecond.searchParams).toEqual({ a: 'b' })
 
   logic.actions.list()
 

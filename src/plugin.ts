@@ -72,7 +72,12 @@ export function routerPlugin({
                 action: urlToActionMapping[pathFromRoutes],
               }))
 
-              listeners[router.actionTypes.locationChanged] = function (payload: LocationChangedPayload) {
+              listeners[router.actionTypes.locationChanged] = function (
+                payload: LocationChangedPayload,
+                _,
+                __,
+                previousState,
+              ) {
                 const { pathname, searchParams, hashParams } = payload
                 const pathInWindow = decodeURI(pathname)
                 const pathInRoutes = pathFromWindowToRoutes(pathInWindow)
@@ -88,7 +93,10 @@ export function routerPlugin({
                   }
                 }
 
-                matchedRoute && matchedRoute.action(params, searchParams, hashParams, payload)
+                if (matchedRoute) {
+                  const previousLocation = router.selectors.currentLocation(previousState)
+                  matchedRoute.action(params, searchParams, hashParams, payload, previousLocation)
+                }
               }
             }
 

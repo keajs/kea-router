@@ -80,6 +80,13 @@ export const router = kea<routerType>({
     ],
   }),
 
+  selectors: ({}) => ({
+    currentLocation: [
+      (s) => [s.location, s.searchParams, s.hashParams, s.lastMethod],
+      (location, searchParams, hashParams, method) => ({ ...location, searchParams, hashParams, method }),
+    ],
+  }),
+
   listeners: ({ sharedListeners }) => ({
     push: sharedListeners.updateLocation,
     replace: sharedListeners.updateLocation,
