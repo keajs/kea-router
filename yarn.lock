@@ -4632,20 +4632,20 @@ jsx-ast-utils@^2.2.3:
     array-includes "^3.0.3"
     object.assign "^4.1.0"
 
-kea-typegen@^1.2.2:
-  version "1.2.2"
-  resolved "https://registry.yarnpkg.com/kea-typegen/-/kea-typegen-1.2.2.tgz#1eec505c9b570b13053a4fd0a048f5390d0b211b"
-  integrity sha512-2Ushf0mZWqpJMbBBc7raDtUIqOkxv7SmRQs4Y3R5pyMfcw5zOcxAJJKwnX9QfYK0N37O8GlGs7wQLti17md99A==
+kea-typegen@^3.0.0-alpha.0:
+  version "3.0.0-alpha.0"
+  resolved "https://registry.yarnpkg.com/kea-typegen/-/kea-typegen-3.0.0-alpha.0.tgz#1f486062452373f586388a0a4f5b1f0166621dc8"
+  integrity sha512-ehhH8E4vmAGkm6XjY5TmYMZdvEqyfjob2ndQpYbqBvxc+jqCdm6+NYkPBfbJfyR6qVcupHWUXlgkUTQ4wuXvqA==
   dependencies:
     "@wessberg/ts-clone-node" "0.3.19"
     diff "^5.0.0"
-    prettier "^2.3.1"
+    prettier "^2.5.1"
     yargs "^16.2.0"
 
-kea@^2.2.2:
-  version "2.2.2"
-  resolved "https://registry.yarnpkg.com/kea/-/kea-2.2.2.tgz#2a58ca5089b95fcc463224e6d08d95f05fac7af7"
-  integrity sha512-9qtmm/J0kz+wSrST1ljsxuoKoIpAhynkV0Rht8OQkAHvX7KEtABNVVdX/r6AgK1BOsjACF4t6tcMnYXG51GEZQ==
+kea@^3.0.0-alpha.1:
+  version "3.0.0-alpha.1"
+  resolved "https://registry.yarnpkg.com/kea/-/kea-3.0.0-alpha.1.tgz#4458b9df0a9a02abd109d339f9d191fb7da548c1"
+  integrity sha512-AvP8xk/lIXTfhd4K/fknIS9Z9bZbW+CCTNSgt4jlm9wUnyy6JWxzxKg1Aw5WbwpkbnFDMBU62B+gjsoi+w4TIg==
 
 kind-of@^3.0.2, kind-of@^3.0.3, kind-of@^3.2.0:
   version "3.2.2"
@@ -5443,10 +5443,10 @@ prettier-linter-helpers@^1.0.0:
   dependencies:
     fast-diff "^1.1.2"
 
-prettier@^2.3.1:
-  version "2.4.1"
-  resolved "https://registry.yarnpkg.com/prettier/-/prettier-2.4.1.tgz#671e11c89c14a4cfc876ce564106c4a6726c9f5c"
-  integrity sha512-9fbDAXSBcc6Bs1mZrDYb3XKzDLm4EXXL9sC1LqKP5rZkT6KRr/rf9amVUcODVXgguK/isJz0d0hP72WeaKWsvA==
+prettier@^2.5.1:
+  version "2.6.2"
+  resolved "https://registry.yarnpkg.com/prettier/-/prettier-2.6.2.tgz#e26d71a18a74c3d0f0597f55f01fb6c06c206032"
+  integrity sha512-PkUpF+qoXTqhOeWL9fu7As8LXsIUZ1WYaJiY/a7McAQzxjk82OF0tibkFXVCDImZtWxbvojFjerkiLb0/q8mew==
 
 pretty-format@^24.9.0:
   version "24.9.0"
@@ -6679,10 +6679,10 @@ typedarray-to-buffer@^3.1.5:
   dependencies:
     is-typedarray "^1.0.0"
 
-typescript@^4.0.5:
-  version "4.0.5"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.0.5.tgz#ae9dddfd1069f1cb5beb3ef3b2170dd7c1332389"
-  integrity sha512-ywmr/VrTVCmNTJ6iV2LwIrfG1P+lv6luD8sUJs+2eI9NLGigaN+nUQc13iHqisq7bra9lnmUSYqbJvegraBOPQ==
+typescript@^4.6.3:
+  version "4.6.3"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.6.3.tgz#eefeafa6afdd31d725584c67a0eaba80f6fc6c6c"
+  integrity sha512-yNIatDa5iaofVozS/uQJEl3JRWLKKGJKh6Yaiv0GLGSuhpFJe7P3SbHZ8/yjAHRQwKRoA6YZqlfjXWmVzoVSMw==
 
 unicode-canonical-property-names-ecmascript@^1.0.4:
   version "1.0.4"

@@ -1,29 +1,25 @@
 /* global window */
-import { kea, getPluginContext } from 'kea'
+import {
+  kea,
+  getPluginContext,
+  path,
+  actions,
+  reducers,
+  selectors,
+  listeners,
+  sharedListeners,
+  afterMount,
+  beforeUnmount,
+  setPluginContext,
+} from 'kea'
 import { combineUrl } from './utils'
 import { routerType } from './routerType'
 import { LocationChangedPayload, RouterPluginContext } from './types'
 
-/*
-Usage:
+export const router = kea<routerType>([
+  path(['kea', 'router']),
 
-  kea({
-    actionToUrl: ({ actions }) => ({
-      [actions.selectEmail]: payload => `/signup/email`,
-      [actions.unselectEmail]: payload => `/signup`
-    }),
-
-    urlToAction: ({ actions }) => ({
-      '/signup/:type': ({ type }) => actions.selectEmail(),
-      '/signup': () => actions.unselectEmail()
-    }),
-  })
-*/
-
-export const router = kea<routerType>({
-  path: () => ['kea', 'router'],
-
-  actions: () => ({
+  actions({
     push: (url: string, searchInput?: string | Record<string, any>, hashInput?: string | Record<string, any>) => ({
       url,
       searchInput,
@@ -53,7 +49,7 @@ export const router = kea<routerType>({
     }),
   }),
 
-  reducers: () => ({
+  reducers(() => ({
     location: [
       getLocationFromContext(),
       {
@@ -78,21 +74,16 @@ export const router = kea<routerType>({
         locationChanged: (_, { method }) => method,
       },
     ],
-  }),
+  })),
 
-  selectors: ({}) => ({
+  selectors({
     currentLocation: [
       (s) => [s.location, s.searchParams, s.hashParams, s.lastMethod],
       (location, searchParams, hashParams, method) => ({ ...location, searchParams, hashParams, method }),
     ],
   }),
 
-  listeners: ({ sharedListeners }) => ({
-    push: sharedListeners.updateLocation,
-    replace: sharedListeners.updateLocation,
-  }),
-
-  sharedListeners: ({ actions }) => ({
+  sharedListeners(({ actions }) => ({
     updateLocation: ({ url, searchInput, hashInput }, breakpoint, action) => {
       const method: 'push' | 'replace' = action.type === actions.push.toString() ? 'push' : 'replace'
       const { history } = getRouterContext()
@@ -101,42 +92,49 @@ export const router = kea<routerType>({
       history[`${method}State` as 'pushState' | 'replaceState']({}, '', response.url)
       actions.locationChanged({ method: method.toUpperCase() as 'PUSH' | 'REPLACE', ...response })
     },
+  })),
+
+  listeners(({ sharedListeners }) => ({
+    push: sharedListeners.updateLocation,
+    replace: sharedListeners.updateLocation,
+  })),
+
+  afterMount(({ actions, cache }) => {
+    if (typeof window === 'undefined') {
+      return
+    }
+
+    cache.popListener = (event: PopStateEvent) => {
+      const { location, decodeParams } = getRouterContext()
+      if (location) {
+        actions.locationChanged({
+          method: 'POP',
+          pathname: location.pathname,
+          search: location.search,
+          searchParams: decodeParams(location.search, '?'),
+          hash: location.hash,
+          hashParams: decodeParams(location.hash, '#'),
+          url: `${location.pathname}${location.search}${location.hash}`,
+        })
+      }
+    }
+    window.addEventListener('popstate', cache.popListener)
   }),
 
-  events: ({ actions, cache }) => ({
-    afterMount() {
-      if (typeof window === 'undefined') {
-        return
-      }
-
-      cache.listener = (event: PopStateEvent) => {
-        const { location, decodeParams } = getRouterContext()
-        if (location) {
-          actions.locationChanged({
-            method: 'POP',
-            pathname: location.pathname,
-            search: location.search,
-            searchParams: decodeParams(location.search, '?'),
-            hash: location.hash,
-            hashParams: decodeParams(location.hash, '#'),
-            url: `${location.pathname}${location.search}${location.hash}`,
-          })
-        }
-      }
-      window.addEventListener('popstate', cache.listener)
-    },
-
-    beforeUnmount() {
-      if (typeof window === 'undefined') {
-        return
-      }
-      window.removeEventListener('popstate', cache.listener)
-    },
+  beforeUnmount(({ cache }) => {
+    if (typeof window === 'undefined') {
+      return
+    }
+    window.removeEventListener('popstate', cache.popListener)
   }),
-})
+])
 
-function getRouterContext(): RouterPluginContext {
+export function getRouterContext(): RouterPluginContext {
   return getPluginContext('router') as RouterPluginContext
+}
+
+export function setRouterContext(context: RouterPluginContext): void {
+  setPluginContext('router', context)
 }
 
 function getLocationFromContext() {
