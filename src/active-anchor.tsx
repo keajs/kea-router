@@ -11,10 +11,10 @@ interface ActiveAProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
      * Whether the match is exact
      *
      * If you have two links to /console and /console/posts,
-     * "exact" should be used in the /console NavLink so that
+     * "exact" should be used in the /console ActiveA so that
      *
-     * <NavLink href="/console" exact={true} />
-     * <NavLink href="/console/posts" />
+     * <ActiveA href="/console" exact={true} />
+     * <ActiveA href="/console/posts" />
      */
     exact?: boolean
 }
