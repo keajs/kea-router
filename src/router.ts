@@ -94,7 +94,7 @@ export const router = kea<routerType>([
         return
       }
 
-      cache._stateCount = cache._stateCount + 1
+      cache._stateCount = (cache._stateCount ?? 0) + 1
       history[`${method}State` as 'pushState' | 'replaceState']({ count: cache._stateCount }, '', response.url)
       actions.locationChanged({ method: method.toUpperCase() as 'PUSH' | 'REPLACE', ...response })
     },
@@ -110,20 +110,26 @@ export const router = kea<routerType>([
       return
     }
 
-    cache._stateCount = 0
+    cache._stateCount = null
     cache.popListener = (event: PopStateEvent) => {
       const { location, decodeParams } = getRouterContext()
 
       if (event.state.count !== cache._stateCount && preventUnload()) {
-        if (typeof event.state.count === 'number' && event.state.count < cache._stateCount) {
+        if (typeof event.state.count !== 'number' || cache._stateCount === null) {
+          // If we can't determine the direction then we just live with the url being wrong
+          return
+        }
+        if (event.state.count < cache._stateCount) {
+          cache._stateCount = event.state.count + 1 // Account for page reloads
           history.forward()
         } else {
+          cache._stateCount = event.state.count - 1 // Account for page reloads
           history.back()
         }
         return
       }
 
-      cache._stateCount = event.state.count
+      cache._stateCount = typeof event.state.count === 'number' ? event.state.count : cache._stateCount
 
       if (location) {
         actions.locationChanged({
