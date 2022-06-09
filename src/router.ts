@@ -110,7 +110,7 @@ export const router = kea<routerType>([
       return
     }
 
-    cache._stateCount = null
+    cache._stateCount = typeof history.state.count === 'number' ? history.state.count : null
     cache.popListener = (event: PopStateEvent) => {
       const { location, decodeParams } = getRouterContext()
 
