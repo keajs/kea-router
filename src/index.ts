@@ -17,5 +17,6 @@ Usage:
 export { router } from './router'
 export { routerPlugin } from './plugin'
 export { encodeParams, decodeParams, combineUrl } from './utils'
+export { useUnloadConfirmation } from './useUnloadConfirmation'
 export { A } from './anchor'
 export * from './builders'

@@ -15,6 +15,7 @@ import {
 import { combineUrl } from './utils'
 import { routerType } from './routerType'
 import { LocationChangedPayload, RouterPluginContext } from './types'
+import { preventUnload } from './useUnloadConfirmation'
 
 export const router = kea<routerType>([
   path(['kea', 'router']),
@@ -83,13 +84,18 @@ export const router = kea<routerType>([
     ],
   }),
 
-  sharedListeners(({ actions }) => ({
+  sharedListeners(({ actions, cache }) => ({
     updateLocation: ({ url, searchInput, hashInput }, breakpoint, action) => {
       const method: 'push' | 'replace' = action.type === actions.push.toString() ? 'push' : 'replace'
       const { history } = getRouterContext()
       const response = combineUrl(url, searchInput, hashInput)
 
-      history[`${method}State` as 'pushState' | 'replaceState']({}, '', response.url)
+      if (preventUnload()) {
+        return
+      }
+
+      cache._stateCount = cache._stateCount + 1
+      history[`${method}State` as 'pushState' | 'replaceState']({ count: cache._stateCount }, '', response.url)
       actions.locationChanged({ method: method.toUpperCase() as 'PUSH' | 'REPLACE', ...response })
     },
   })),
@@ -104,8 +110,21 @@ export const router = kea<routerType>([
       return
     }
 
+    cache._stateCount = 0
     cache.popListener = (event: PopStateEvent) => {
       const { location, decodeParams } = getRouterContext()
+
+      if (event.state.count !== cache._stateCount && preventUnload()) {
+        if (typeof event.state.count === 'number' && event.state.count < cache._stateCount) {
+          history.forward()
+        } else {
+          history.back()
+        }
+        return
+      }
+
+      cache._stateCount = event.state.count
+
       if (location) {
         actions.locationChanged({
           method: 'POP',
