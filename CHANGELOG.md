@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 3.0.1 - 2022-06-10
+- Add `beforeUnload` builder. @benjackwhite
+
+## 3.0.0 - 2022-05-12
+- Kea v3 support
+
 ## 1.0.7 - 2022-01-25
 
 - Add `currentLocation` selector to `router`, which contains both `search` and `searchParams` unlike `location` that doesn't contain the params.

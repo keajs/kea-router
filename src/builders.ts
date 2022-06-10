@@ -1,12 +1,6 @@
 import { getRouterContext, router } from './router'
 import UrlPattern from 'url-pattern'
-import {
-  ActionToUrlPayload,
-  BeforeUnloadPayload,
-  LocationChangedPayload,
-  RouterBeforeUnloadInterceptor,
-  UrlToActionPayload,
-} from './types'
+import { ActionToUrlPayload, BeforeUnloadPayload, LocationChangedPayload, UrlToActionPayload } from './types'
 import { stringOrObjectToString } from './utils'
 import { afterMount, beforeUnmount, BuiltLogic, connect, getContext, listeners, Logic, LogicBuilder } from 'kea'
 
