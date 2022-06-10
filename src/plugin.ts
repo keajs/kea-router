@@ -24,6 +24,11 @@ export function routerPlugin(options: RouterPluginOptions = {}): KeaPlugin {
           pathFromRoutesToWindow: (path) => path,
           pathFromWindowToRoutes: (path) => path,
           options,
+          beforeUnloadInterceptors: new Set(),
+          stateCount:
+            typeof window !== 'undefined' && typeof window.history.state?.count === 'number'
+              ? window.history.state?.count
+              : null,
         })
       },
 

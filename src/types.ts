@@ -1,4 +1,5 @@
 import { Logic } from 'kea'
+import { MutableRefObject } from 'react'
 
 export interface RouterPluginOptions {
   history?: undefined
@@ -20,7 +21,14 @@ export interface RouterPluginContext {
   pathFromWindowToRoutes: (path: string) => string
   encodeParams: (obj: Record<string, any>, symbol: string) => string
   decodeParams: (input: string, symbol: string) => Record<string, any>
+  stateCount: number
   options: RouterPluginOptions
+  beforeUnloadInterceptors: Set<MutableRefObject<RouterBeforeUnloadInterceptors>>
+}
+
+export interface RouterBeforeUnloadInterceptors {
+  unloadMessage: string | null
+  onConfirm: (() => void) | undefined
 }
 
 // from node_modules/url-pattern/index.d.ts

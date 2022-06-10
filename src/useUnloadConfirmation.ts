@@ -1,10 +1,5 @@
-import { MutableRefObject, useEffect, useRef } from 'react'
-import { router } from './router'
-
-interface UnloadConfig {
-  unloadMessage: string | null
-  onConfirm: (() => void) | undefined
-}
+import { useEffect, useRef } from 'react'
+import { getRouterContext } from './router'
 
 /**
  * This makes sure that unloading the page requires user confirmation - if unloadMessage is set.
@@ -18,7 +13,13 @@ export function useUnloadConfirmation(unloadMessage: string | null, onConfirm?: 
     onConfirm,
   })
 
-  router.cache.__unloadConfirmations = (router.cache.__unloadConfirmations || []) as MutableRefObject<UnloadConfig>[]
+  const { beforeUnloadInterceptors } = getRouterContext()
+
+  // Update the reference each time as we don't want to allow the `onConfirm` to change the useEffect handler
+  routerUnloadFunctionRef.current = {
+    unloadMessage,
+    onConfirm,
+  }
 
   useEffect(() => {
     const unmountFunctions: (() => void)[] = []
@@ -37,18 +38,10 @@ export function useUnloadConfirmation(unloadMessage: string | null, onConfirm?: 
 
     // Kea-router based unloading (e.g. push(), replace())
     if (unloadMessage) {
-      routerUnloadFunctionRef.current = {
-        unloadMessage,
-        onConfirm,
-      }
-
-      router.cache.__unloadConfirmations.push(routerUnloadFunctionRef)
+      beforeUnloadInterceptors.add(routerUnloadFunctionRef)
 
       unmountFunctions.push(() => {
-        const index = router.cache.__unloadConfirmations.indexOf(routerUnloadFunctionRef)
-        if (index > -1) {
-          router.cache.__unloadConfirmations.splice(index, 1)
-        }
+        beforeUnloadInterceptors.delete(routerUnloadFunctionRef)
       })
     }
 
@@ -60,12 +53,12 @@ export function useUnloadConfirmation(unloadMessage: string | null, onConfirm?: 
 
 export function preventUnload(): boolean {
   // We only check the last reference for unloading. Generally there should only be one loaded anyway.
-  const unloadConfirmations = router.cache.__unloadConfirmations as MutableRefObject<UnloadConfig>[]
+  const { beforeUnloadInterceptors } = getRouterContext()
 
-  if (!unloadConfirmations) {
+  if (!beforeUnloadInterceptors) {
     return
   }
-  const lastRef = unloadConfirmations[unloadConfirmations.length - 1]
+  const lastRef = Array.from(beforeUnloadInterceptors).pop()
 
   if (!lastRef || !lastRef.current.unloadMessage) {
     return false

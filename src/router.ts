@@ -48,6 +48,7 @@ export const router = kea<routerType>([
       hashParams,
       initial: initial || false,
     }),
+    clearUnloadInterceptors: true, // Useful for "save" events where you don't want to wait for a re-render before a push
   }),
 
   reducers(() => ({
@@ -84,18 +85,19 @@ export const router = kea<routerType>([
     ],
   }),
 
-  sharedListeners(({ actions, cache }) => ({
+  sharedListeners(({ actions }) => ({
     updateLocation: ({ url, searchInput, hashInput }, breakpoint, action) => {
       const method: 'push' | 'replace' = action.type === actions.push.toString() ? 'push' : 'replace'
-      const { history } = getRouterContext()
+      const routerContext = getRouterContext()
+      const { history } = routerContext
       const response = combineUrl(url, searchInput, hashInput)
 
       if (preventUnload()) {
         return
       }
 
-      cache._stateCount = (cache._stateCount ?? 0) + 1
-      history[`${method}State` as 'pushState' | 'replaceState']({ count: cache._stateCount }, '', response.url)
+      routerContext.stateCount = (routerContext.stateCount ?? 0) + 1
+      history[`${method}State`]({ count: routerContext.stateCount }, '', response.url)
       actions.locationChanged({ method: method.toUpperCase() as 'PUSH' | 'REPLACE', ...response })
     },
   })),
@@ -103,6 +105,10 @@ export const router = kea<routerType>([
   listeners(({ sharedListeners }) => ({
     push: sharedListeners.updateLocation,
     replace: sharedListeners.updateLocation,
+    clearUnloadHandlers: () => {
+      const routerContext = getRouterContext()
+      routerContext.beforeUnloadInterceptors.clear()
+    },
   })),
 
   afterMount(({ actions, cache }) => {
@@ -110,29 +116,34 @@ export const router = kea<routerType>([
       return
     }
 
-    cache._stateCount = typeof history.state?.count === 'number' ? history.state?.count : null
-
     cache.popListener = (event: PopStateEvent) => {
-      const { location, decodeParams } = getRouterContext()
+      const routerContext = getRouterContext()
+      const { location, decodeParams } = routerContext
 
       const eventStateCount = event.state?.count
 
-      if (eventStateCount !== cache._stateCount && preventUnload()) {
-        if (typeof eventStateCount !== 'number' || cache._stateCount === null) {
+      console.log('KEA_ROUTER', {
+        eventStateCount: eventStateCount,
+        stateCount: routerContext.stateCount,
+        listenerLength: cache.__unloadConfirmations?.length,
+      })
+
+      if (eventStateCount !== routerContext.stateCount && preventUnload()) {
+        if (typeof eventStateCount !== 'number' || routerContext.stateCount === null) {
           // If we can't determine the direction then we just live with the url being wrong
           return
         }
-        if (eventStateCount < cache._stateCount) {
-          cache._stateCount = eventStateCount + 1 // Account for page reloads
+        if (eventStateCount < routerContext.stateCount) {
+          routerContext.stateCount = eventStateCount + 1 // Account for page reloads
           history.forward()
         } else {
-          cache._stateCount = eventStateCount - 1 // Account for page reloads
+          routerContext.stateCount = eventStateCount - 1 // Account for page reloads
           history.back()
         }
         return
       }
 
-      cache._stateCount = typeof eventStateCount === 'number' ? eventStateCount : cache._stateCount
+      routerContext.stateCount = typeof eventStateCount === 'number' ? eventStateCount : routerContext.stateCount
 
       if (location) {
         actions.locationChanged({
