@@ -1,11 +1,14 @@
 /* global test, expect */
-import { kea, resetContext } from 'kea'
+import { kea, actions, reducers, resetContext } from 'kea'
 
 import '@babel/polyfill'
 
 import { routerPlugin } from '../plugin'
 import { parsePath } from '../utils'
 import { router } from '../router'
+import { urlToAction, actionToUrl, beforeUnload } from '../builders'
+
+window.confirm = jest.fn()
 
 test('urlToAction and actionToUrl work', async () => {
   const location = {
@@ -523,4 +526,85 @@ test('urlPatternOptions', async () => {
 
   expect(location.pathname).toBe('/pages')
   expect(logic.values.activePage).toBe(null)
+})
+
+test('beforeUnload', async () => {
+  const location = {
+    pathname: '/pages/first',
+    search: '',
+    hash: '',
+  }
+
+  const onConirmFn = jest.fn()
+
+  const history = {
+    pushState(state, _, url) {
+      Object.assign(location, parsePath(url))
+    },
+    replaceState(state, _, url) {
+      Object.assign(location, parsePath(url))
+    },
+  }
+
+  resetContext({
+    plugins: [routerPlugin({ history, location })],
+    createStore: { middleware: [] },
+  })
+
+  const logic = kea([
+    actions(() => ({
+      page: (page) => ({ page }),
+      preventUnload: (preventUnload) => ({ preventUnload }),
+    })),
+
+    reducers(({ actions }) => ({
+      preventUnload: [
+        false,
+        {
+          [actions.preventUnload]: (_, { preventUnload }) => preventUnload,
+        },
+      ],
+    })),
+
+    urlToAction(({ actions }) => ({
+      '/pages/:page': ({ page }, __, ___, payload, previousLocation) => {
+        actions.page(page)
+      },
+    })),
+
+    actionToUrl(({ actions }) => ({
+      [actions.page]: ({ page }) => `/pages/${page}`,
+    })),
+
+    beforeUnload(({ values }) => ({
+      enabled: () => values.preventUnload,
+      message: "You're not going anywhere!",
+      onConfirm: onConirmFn,
+    })),
+  ])
+
+  const unmount = logic.mount()
+
+  expect(location.pathname).toBe('/pages/first')
+  expect(logic.values.preventUnload).toBe(false)
+
+  logic.actions.page('prevent')
+  logic.actions.preventUnload(true)
+
+  expect(location.pathname).toBe('/pages/prevent')
+  expect(logic.values.preventUnload).toBe(true)
+
+  // Doesn't navigate if denied
+  window.confirm.mockReturnValueOnce(false)
+  logic.actions.page('first')
+  expect(location.pathname).toBe('/pages/prevent')
+  expect(onConirmFn).not.toBeCalled()
+
+  // Does navigate if confirmed
+  window.confirm.mockReturnValueOnce(true)
+  logic.actions.page('first')
+  expect(location.pathname).toBe('/pages/first')
+  expect(onConirmFn).toBeCalled()
+
+  unmount()
 })
