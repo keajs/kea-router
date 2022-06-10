@@ -21,14 +21,15 @@ export interface RouterPluginContext {
   pathFromWindowToRoutes: (path: string) => string
   encodeParams: (obj: Record<string, any>, symbol: string) => string
   decodeParams: (input: string, symbol: string) => Record<string, any>
-  stateCount: number
+  historyStateCount: number
   options: RouterPluginOptions
-  beforeUnloadInterceptors: Set<MutableRefObject<RouterBeforeUnloadInterceptors>>
+  beforeUnloadInterceptors: Set<RouterBeforeUnloadInterceptor>
 }
 
-export interface RouterBeforeUnloadInterceptors {
-  unloadMessage: string | null
-  onConfirm: (() => void) | undefined
+export interface RouterBeforeUnloadInterceptor {
+  enabled: () => boolean
+  message: string
+  onConfirm?: () => void
 }
 
 // from node_modules/url-pattern/index.d.ts
@@ -105,3 +106,5 @@ export type ActionToUrlPayload<L extends Logic = Logic> = {
         { replace?: boolean },
       ]
 }
+
+export type BeforeUnloadPayload<L extends Logic = Logic> = RouterBeforeUnloadInterceptor

@@ -1,8 +1,8 @@
 import { KeaPlugin } from 'kea'
 import { router, setRouterContext } from './router'
-import { encodeParams as encode, decodeParams as decode, stringOrObjectToString } from './utils'
+import { encodeParams as encode, decodeParams as decode } from './utils'
 import { RouterPluginContext, RouterPluginOptions } from './types'
-import { actionToUrl, urlToAction } from './builders'
+import { actionToUrl, beforeUnload, urlToAction } from './builders'
 
 const memoryHistroy = {
   pushState(state, _, url) {},
@@ -25,7 +25,7 @@ export function routerPlugin(options: RouterPluginOptions = {}): KeaPlugin {
           pathFromWindowToRoutes: (path) => path,
           options,
           beforeUnloadInterceptors: new Set(),
-          stateCount:
+          historyStateCount:
             typeof window !== 'undefined' && typeof window.history.state?.count === 'number'
               ? window.history.state?.count
               : null,
@@ -39,6 +39,7 @@ export function routerPlugin(options: RouterPluginOptions = {}): KeaPlugin {
       legacyBuild(logic, input) {
         'urlToAction' in input && input.urlToAction && urlToAction(input.urlToAction)(logic)
         'actionToUrl' in input && input.actionToUrl && actionToUrl(input.actionToUrl)(logic)
+        'beforeUnload' in input && input.beforeUnload && beforeUnload(input.beforeUnload)(logic)
       },
     },
   }

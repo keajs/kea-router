@@ -15,7 +15,29 @@ import {
 import { combineUrl } from './utils'
 import { routerType } from './routerType'
 import { LocationChangedPayload, RouterPluginContext } from './types'
-import { preventUnload } from './useUnloadConfirmation'
+
+function preventUnload(): boolean {
+  // We only check the last reference for unloading. Generally there should only be one loaded anyway.
+  const { beforeUnloadInterceptors } = getRouterContext()
+
+  if (!beforeUnloadInterceptors) {
+    return
+  }
+
+  for (const beforeUnload of Array.from(beforeUnloadInterceptors)) {
+    if (!beforeUnload.enabled()) {
+      continue
+    }
+
+    if (confirm(beforeUnload.message)) {
+      beforeUnload.onConfirm?.()
+      return false
+    }
+    return true
+  }
+
+  return false
+}
 
 export const router = kea<routerType>([
   path(['kea', 'router']),
@@ -96,8 +118,8 @@ export const router = kea<routerType>([
         return
       }
 
-      routerContext.stateCount = (routerContext.stateCount ?? 0) + 1
-      history[`${method}State`]({ count: routerContext.stateCount }, '', response.url)
+      routerContext.historyStateCount = (routerContext.historyStateCount ?? 0) + 1
+      history[`${method}State`]({ count: routerContext.historyStateCount }, '', response.url)
       actions.locationChanged({ method: method.toUpperCase() as 'PUSH' | 'REPLACE', ...response })
     },
   })),
@@ -122,22 +144,29 @@ export const router = kea<routerType>([
 
       const eventStateCount = event.state?.count
 
-      if (eventStateCount !== routerContext.stateCount && preventUnload()) {
-        if (typeof eventStateCount !== 'number' || routerContext.stateCount === null) {
+      console.log('KEA_ROUTER', {
+        eventStateCount: eventStateCount,
+        stateCount: routerContext.historyStateCount,
+        listenerLength: cache.__unloadConfirmations?.length,
+      })
+
+      if (eventStateCount !== routerContext.historyStateCount && preventUnload()) {
+        if (typeof eventStateCount !== 'number' || routerContext.historyStateCount === null) {
           // If we can't determine the direction then we just live with the url being wrong
           return
         }
-        if (eventStateCount < routerContext.stateCount) {
-          routerContext.stateCount = eventStateCount + 1 // Account for page reloads
+        if (eventStateCount < routerContext.historyStateCount) {
+          routerContext.historyStateCount = eventStateCount + 1 // Account for page reloads
           history.forward()
         } else {
-          routerContext.stateCount = eventStateCount - 1 // Account for page reloads
+          routerContext.historyStateCount = eventStateCount - 1 // Account for page reloads
           history.back()
         }
         return
       }
 
-      routerContext.stateCount = typeof eventStateCount === 'number' ? eventStateCount : routerContext.stateCount
+      routerContext.historyStateCount =
+        typeof eventStateCount === 'number' ? eventStateCount : routerContext.historyStateCount
 
       if (location) {
         actions.locationChanged({
