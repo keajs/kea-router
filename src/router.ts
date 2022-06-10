@@ -70,7 +70,6 @@ export const router = kea<routerType>([
       hashParams,
       initial: initial || false,
     }),
-    clearUnloadInterceptors: true, // Useful for "save" events where you don't want to wait for a re-render before a push
   }),
 
   reducers(() => ({
@@ -127,10 +126,6 @@ export const router = kea<routerType>([
   listeners(({ sharedListeners }) => ({
     push: sharedListeners.updateLocation,
     replace: sharedListeners.updateLocation,
-    clearUnloadHandlers: () => {
-      const routerContext = getRouterContext()
-      routerContext.beforeUnloadInterceptors.clear()
-    },
   })),
 
   afterMount(({ actions, cache }) => {
