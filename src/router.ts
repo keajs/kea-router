@@ -144,12 +144,6 @@ export const router = kea<routerType>([
 
       const eventStateCount = event.state?.count
 
-      console.log('KEA_ROUTER', {
-        eventStateCount: eventStateCount,
-        stateCount: routerContext.historyStateCount,
-        listenerLength: cache.__unloadConfirmations?.length,
-      })
-
       if (eventStateCount !== routerContext.historyStateCount && preventUnload()) {
         if (typeof eventStateCount !== 'number' || routerContext.historyStateCount === null) {
           // If we can't determine the direction then we just live with the url being wrong
