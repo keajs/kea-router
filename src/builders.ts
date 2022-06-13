@@ -140,11 +140,11 @@ export function urlToAction<L extends Logic = Logic>(
 }
 
 /**
-beforeUnload - when enabled prevent navigation with a confrimation popup
+beforeUnload - when enabled prevent navigation with a confirmation popup
   kea([
     beforeUnload(({ actions, values }) => ({
-      enabled: values.formChanged,
-      message: "Your changes will be lost. Are you sure you want to leave?"
+      enabled: () => values.formChanged,
+      message: "Your changes will be lost. Are you sure you want to leave?",
       onConfirm: () => actions.resetForm()
     })),
   ])
