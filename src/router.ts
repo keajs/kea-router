@@ -12,11 +12,11 @@ import {
   beforeUnmount,
   setPluginContext,
 } from 'kea'
-import { combineUrl } from './utils'
+import { CombinedLocation, combineUrl } from './utils'
 import { routerType } from './routerType'
 import { LocationChangedPayload, RouterPluginContext } from './types'
 
-function preventUnload(): boolean {
+function preventUnload(newLocation: CombinedLocation): boolean {
   // We only check the last reference for unloading. Generally there should only be one loaded anyway.
   const { beforeUnloadInterceptors } = getRouterContext()
 
@@ -25,7 +25,7 @@ function preventUnload(): boolean {
   }
 
   for (const beforeUnload of Array.from(beforeUnloadInterceptors)) {
-    if (!beforeUnload.enabled()) {
+    if (!beforeUnload.enabled(newLocation)) {
       continue
     }
 
@@ -113,7 +113,7 @@ export const router = kea<routerType>([
       const { history } = routerContext
       const response = combineUrl(url, searchInput, hashInput)
 
-      if (preventUnload()) {
+      if (preventUnload(response)) {
         return
       }
 

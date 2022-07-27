@@ -116,20 +116,22 @@ export function parsePath(
 const _e = encodeParams
 const _d = decodeParams
 
-export function combineUrl(
-  url: string,
-  searchInput?: string | Record<string, any>,
-  hashInput?: string | Record<string, any>,
-  encodeParams: (obj: Record<string, any>, symbol: string) => string = getPluginContext('router').encodeParams || _e,
-  decodeParams: (input: string, symbol: string) => Record<string, any> = getPluginContext('router').decodeParams || _d,
-): {
+export interface CombinedLocation {
   pathname: string
   search: string
   searchParams: Record<string, any>
   hash: string
   hashParams: Record<string, any>
   url: string
-} {
+}
+
+export function combineUrl(
+  url: string,
+  searchInput?: string | Record<string, any>,
+  hashInput?: string | Record<string, any>,
+  encodeParams: (obj: Record<string, any>, symbol: string) => string = getPluginContext('router').encodeParams || _e,
+  decodeParams: (input: string, symbol: string) => Record<string, any> = getPluginContext('router').decodeParams || _d,
+): CombinedLocation {
   const parsedPath = parsePath(url)
 
   const response = {
