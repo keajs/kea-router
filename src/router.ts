@@ -16,7 +16,7 @@ import { CombinedLocation, combineUrl, decodeParams as decode, encodeParams as e
 import { routerType } from './routerType'
 import { LocationChangedPayload, RouterPluginContext } from './types'
 
-function preventUnload(newLocation: CombinedLocation): boolean {
+function preventUnload(newLocation?: CombinedLocation): boolean {
   // We only check the last reference for unloading. Generally there should only be one loaded anyway.
   const { beforeUnloadInterceptors } = getRouterContext()
 

@@ -20,7 +20,7 @@ export interface RouterPluginContext extends RouterPluginOptions {
 }
 
 export interface RouterBeforeUnloadInterceptor {
-  enabled: (newLocation: CombinedLocation) => boolean
+  enabled: (newLocation?: CombinedLocation) => boolean
   message: string
   onConfirm?: () => void
 }
