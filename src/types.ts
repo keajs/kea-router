@@ -2,8 +2,11 @@ import { Logic } from 'kea'
 import { CombinedLocation } from 'utils'
 
 export interface RouterPluginOptions {
-  history?: undefined
-  location?: undefined
+  history?: {
+    pushState(state: Record<string, any>, title: string, url: string): void
+    replaceState(state: Record<string, any>, title: string, url: string): void
+  }
+  location?: { pathname: string; search: string; hash: string }
   pathFromRoutesToWindow?: (path: string) => string
   pathFromWindowToRoutes?: (path: string) => string
   encodeParams?: (obj: Record<string, any>, symbol: string) => string
@@ -11,18 +14,8 @@ export interface RouterPluginOptions {
   urlPatternOptions?: UrlPatternOptions
 }
 
-export interface RouterPluginContext {
-  history: {
-    pushState(state: Record<string, any>, title: string, url: string): void
-    replaceState(state: Record<string, any>, title: string, url: string): void
-  }
-  location: { pathname: string; search: string; hash: string }
-  pathFromRoutesToWindow: (path: string) => string
-  pathFromWindowToRoutes: (path: string) => string
-  encodeParams: (obj: Record<string, any>, symbol: string) => string
-  decodeParams: (input: string, symbol: string) => Record<string, any>
+export interface RouterPluginContext extends RouterPluginOptions {
   historyStateCount: number
-  options: RouterPluginOptions
   beforeUnloadInterceptors: Set<RouterBeforeUnloadInterceptor>
 }
 

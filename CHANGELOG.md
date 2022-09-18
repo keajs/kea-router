@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
+## 3.1.0 - 2022-09-18
+- Works without needing to run `resetContext({plugins:[routerPlugin()]})` explicitly
+
 ## 3.0.1 - 2022-06-10
 - Add `beforeUnload` builder. @benjackwhite
 

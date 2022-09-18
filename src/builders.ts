@@ -79,10 +79,7 @@ export function urlToAction<L extends Logic = Logic>(
     logic.cache.__routerListeningToLocation = true
 
     const newListeners: Record<string, any> = {}
-    const {
-      options: { urlPatternOptions },
-      pathFromWindowToRoutes,
-    } = getRouterContext()
+    const { urlPatternOptions, pathFromWindowToRoutes } = getRouterContext()
 
     const routes = Object.entries(inputEntries).map(([pathFromRoutes, action]) => ({
       path: pathFromRoutes,

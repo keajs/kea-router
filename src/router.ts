@@ -12,7 +12,7 @@ import {
   beforeUnmount,
   setPluginContext,
 } from 'kea'
-import { CombinedLocation, combineUrl } from './utils'
+import { CombinedLocation, combineUrl, decodeParams as decode, encodeParams as encode } from './utils'
 import { routerType } from './routerType'
 import { LocationChangedPayload, RouterPluginContext } from './types'
 
@@ -181,11 +181,38 @@ export const router = kea<routerType>([
 ])
 
 export function getRouterContext(): RouterPluginContext {
-  return getPluginContext('router') as RouterPluginContext
+  const context: RouterPluginContext | undefined = getPluginContext('router')
+  if (!context || !context.history || !context.location) {
+    const defaultContext = getDefaultContext()
+    setRouterContext(defaultContext)
+    return defaultContext
+  }
+  return context
 }
 
 export function setRouterContext(context: RouterPluginContext): void {
   setPluginContext('router', context)
+}
+
+export const memoryHistroy = {
+  pushState(state, _, url) {},
+  replaceState(state, _, url) {},
+} as RouterPluginContext['history']
+
+export function getDefaultContext(): RouterPluginContext {
+  return {
+    history: typeof window !== 'undefined' ? window.history : memoryHistroy,
+    location: typeof window !== 'undefined' ? window.location : { pathname: '', search: '', hash: '' },
+    encodeParams: encode,
+    decodeParams: decode,
+    pathFromRoutesToWindow: (path) => path,
+    pathFromWindowToRoutes: (path) => path,
+    beforeUnloadInterceptors: new Set(),
+    historyStateCount:
+      typeof window !== 'undefined' && typeof window.history.state?.count === 'number'
+        ? window.history.state?.count
+        : null,
+  }
 }
 
 function getLocationFromContext() {

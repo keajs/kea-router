@@ -1,34 +1,17 @@
 import { KeaPlugin } from 'kea'
-import { router, setRouterContext } from './router'
-import { encodeParams as encode, decodeParams as decode } from './utils'
-import { RouterPluginContext, RouterPluginOptions } from './types'
+import { getDefaultContext, router, setRouterContext } from './router'
+import { RouterPluginOptions } from './types'
 import { actionToUrl, beforeUnload, urlToAction } from './builders'
-
-const memoryHistroy = {
-  pushState(state, _, url) {},
-  replaceState(state, _, url) {},
-} as RouterPluginContext['history']
 
 export function routerPlugin(options: RouterPluginOptions = {}): KeaPlugin {
   return {
     name: 'router',
     events: {
       afterPlugin() {
+        const defaults = getDefaultContext()
         setRouterContext({
-          history: options.history || (typeof window !== 'undefined' ? window.history : memoryHistroy),
-          location:
-            options.location ||
-            (typeof window !== 'undefined' ? window.location : { pathname: '', search: '', hash: '' }),
-          encodeParams: options.encodeParams ?? encode,
-          decodeParams: options.decodeParams ?? decode,
-          pathFromRoutesToWindow: (path) => path,
-          pathFromWindowToRoutes: (path) => path,
-          options,
-          beforeUnloadInterceptors: new Set(),
-          historyStateCount:
-            typeof window !== 'undefined' && typeof window.history.state?.count === 'number'
-              ? window.history.state?.count
-              : null,
+          ...defaults,
+          ...options,
         })
       },
 
