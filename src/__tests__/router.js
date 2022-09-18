@@ -1,11 +1,14 @@
 /* global test, expect */
-import { kea, resetContext } from 'kea'
+import { kea, actions, reducers, resetContext } from 'kea'
 
 import '@babel/polyfill'
 
 import { routerPlugin } from '../plugin'
 import { parsePath } from '../utils'
 import { router } from '../router'
+import { urlToAction, actionToUrl, beforeUnload } from '../builders'
+
+window.confirm = jest.fn()
 
 test('urlToAction and actionToUrl work', async () => {
   const location = {

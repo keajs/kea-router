@@ -1,8 +1,8 @@
 import { getRouterContext, router } from './router'
 import UrlPattern from 'url-pattern'
-import { ActionToUrlPayload, LocationChangedPayload, UrlToActionPayload } from './types'
+import { ActionToUrlPayload, BeforeUnloadPayload, LocationChangedPayload, UrlToActionPayload } from './types'
 import { stringOrObjectToString } from './utils'
-import { afterMount, BuiltLogic, connect, getContext, listeners, Logic, LogicBuilder } from 'kea'
+import { afterMount, beforeUnmount, BuiltLogic, connect, getContext, listeners, Logic, LogicBuilder } from 'kea'
 
 function assureConnectionToRouter<L extends Logic = Logic>(logic: BuiltLogic<L>) {
   if (!logic.connections[router.pathString]) {
@@ -79,10 +79,7 @@ export function urlToAction<L extends Logic = Logic>(
     logic.cache.__routerListeningToLocation = true
 
     const newListeners: Record<string, any> = {}
-    const {
-      options: { urlPatternOptions },
-      pathFromWindowToRoutes,
-    } = getRouterContext()
+    const { urlPatternOptions, pathFromWindowToRoutes } = getRouterContext()
 
     const routes = Object.entries(inputEntries).map(([pathFromRoutes, action]) => ({
       path: pathFromRoutes,
@@ -135,6 +132,45 @@ export function urlToAction<L extends Logic = Logic>(
           previousState,
         )
       }
+    })(logic)
+  }
+}
+
+/**
+beforeUnload - when enabled prevent navigation with a confirmation popup
+  kea([
+    beforeUnload(({ actions, values }) => ({
+      enabled: () => values.formChanged,
+      message: "Your changes will be lost. Are you sure you want to leave?",
+      onConfirm: () => actions.resetForm()
+    })),
+  ])
+*/
+export function beforeUnload<L extends Logic = Logic>(
+  input: BeforeUnloadPayload<L> | ((logic: BuiltLogic<L>) => BeforeUnloadPayload<L>),
+): LogicBuilder<L> {
+  return (logic) => {
+    const config = typeof input === 'function' ? input(logic) : input
+
+    const beforeWindowUnloadHandler = (e: BeforeUnloadEvent): void => {
+      if (config.enabled()) {
+        e.preventDefault()
+        e.returnValue = config.message
+      }
+    }
+
+    afterMount(() => {
+      const { beforeUnloadInterceptors } = getRouterContext()
+
+      beforeUnloadInterceptors.add(config)
+      window.addEventListener('beforeunload', beforeWindowUnloadHandler)
+    })(logic)
+
+    beforeUnmount(() => {
+      const { beforeUnloadInterceptors } = getRouterContext()
+
+      beforeUnloadInterceptors.delete(config)
+      window.removeEventListener('beforeunload', beforeWindowUnloadHandler)
     })(logic)
   }
 }

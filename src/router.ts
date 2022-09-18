@@ -12,9 +12,32 @@ import {
   beforeUnmount,
   setPluginContext,
 } from 'kea'
-import { combineUrl } from './utils'
+import { CombinedLocation, combineUrl, decodeParams as decode, encodeParams as encode } from './utils'
 import { routerType } from './routerType'
 import { LocationChangedPayload, RouterPluginContext } from './types'
+
+function preventUnload(newLocation: CombinedLocation): boolean {
+  // We only check the last reference for unloading. Generally there should only be one loaded anyway.
+  const { beforeUnloadInterceptors } = getRouterContext()
+
+  if (!beforeUnloadInterceptors) {
+    return
+  }
+
+  for (const beforeUnload of Array.from(beforeUnloadInterceptors)) {
+    if (!beforeUnload.enabled(newLocation)) {
+      continue
+    }
+
+    if (confirm(beforeUnload.message)) {
+      beforeUnload.onConfirm?.()
+      return false
+    }
+    return true
+  }
+
+  return false
+}
 
 export const router = kea<routerType>([
   path(['kea', 'router']),
@@ -86,10 +109,16 @@ export const router = kea<routerType>([
   sharedListeners(({ actions }) => ({
     updateLocation: ({ url, searchInput, hashInput }, breakpoint, action) => {
       const method: 'push' | 'replace' = action.type === actions.push.toString() ? 'push' : 'replace'
-      const { history } = getRouterContext()
+      const routerContext = getRouterContext()
+      const { history } = routerContext
       const response = combineUrl(url, searchInput, hashInput)
 
-      history[`${method}State` as 'pushState' | 'replaceState']({}, '', response.url)
+      if (preventUnload(response)) {
+        return
+      }
+
+      routerContext.historyStateCount = (routerContext.historyStateCount ?? 0) + 1
+      history[`${method}State`]({ count: routerContext.historyStateCount }, '', response.url)
       actions.locationChanged({ method: method.toUpperCase() as 'PUSH' | 'REPLACE', ...response })
     },
   })),
@@ -105,7 +134,29 @@ export const router = kea<routerType>([
     }
 
     cache.popListener = (event: PopStateEvent) => {
-      const { location, decodeParams } = getRouterContext()
+      const routerContext = getRouterContext()
+      const { location, decodeParams } = routerContext
+
+      const eventStateCount = event.state?.count
+
+      if (eventStateCount !== routerContext.historyStateCount && preventUnload()) {
+        if (typeof eventStateCount !== 'number' || routerContext.historyStateCount === null) {
+          // If we can't determine the direction then we just live with the url being wrong
+          return
+        }
+        if (eventStateCount < routerContext.historyStateCount) {
+          routerContext.historyStateCount = eventStateCount + 1 // Account for page reloads
+          history.forward()
+        } else {
+          routerContext.historyStateCount = eventStateCount - 1 // Account for page reloads
+          history.back()
+        }
+        return
+      }
+
+      routerContext.historyStateCount =
+        typeof eventStateCount === 'number' ? eventStateCount : routerContext.historyStateCount
+
       if (location) {
         actions.locationChanged({
           method: 'POP',
@@ -130,11 +181,38 @@ export const router = kea<routerType>([
 ])
 
 export function getRouterContext(): RouterPluginContext {
-  return getPluginContext('router') as RouterPluginContext
+  const context: RouterPluginContext | undefined = getPluginContext('router')
+  if (!context || !context.history || !context.location) {
+    const defaultContext = getDefaultContext()
+    setRouterContext(defaultContext)
+    return defaultContext
+  }
+  return context
 }
 
 export function setRouterContext(context: RouterPluginContext): void {
   setPluginContext('router', context)
+}
+
+export const memoryHistroy = {
+  pushState(state, _, url) {},
+  replaceState(state, _, url) {},
+} as RouterPluginContext['history']
+
+export function getDefaultContext(): RouterPluginContext {
+  return {
+    history: typeof window !== 'undefined' ? window.history : memoryHistroy,
+    location: typeof window !== 'undefined' ? window.location : { pathname: '', search: '', hash: '' },
+    encodeParams: encode,
+    decodeParams: decode,
+    pathFromRoutesToWindow: (path) => path,
+    pathFromWindowToRoutes: (path) => path,
+    beforeUnloadInterceptors: new Set(),
+    historyStateCount:
+      typeof window !== 'undefined' && typeof window.history.state?.count === 'number'
+        ? window.history.state?.count
+        : null,
+  }
 }
 
 function getLocationFromContext() {
