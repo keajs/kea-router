@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## 3.1.1 - 2022-09-18
+- Add `ActiveA` tag
+- Pass `newLocation` to `RouterBeforeUnloadInterceptor`
+
 ## 3.1.0 - 2022-09-18
 - Works without needing to run `resetContext({plugins:[routerPlugin()]})` explicitly
 
