@@ -1,5 +1,5 @@
 import { Logic } from 'kea'
-import { MutableRefObject } from 'react'
+import { CombinedLocation } from 'utils'
 
 export interface RouterPluginOptions {
   history?: {
@@ -20,7 +20,7 @@ export interface RouterPluginContext extends RouterPluginOptions {
 }
 
 export interface RouterBeforeUnloadInterceptor {
-  enabled: () => boolean
+  enabled: (newLocation: CombinedLocation) => boolean
   message: string
   onConfirm?: () => void
 }
