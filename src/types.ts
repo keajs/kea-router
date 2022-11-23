@@ -1,12 +1,18 @@
 import { Logic } from 'kea'
 import { CombinedLocation } from 'utils'
 
+export interface RouterLocation {
+  pathname: string
+  search: string
+  hash: string
+}
+
 export interface RouterPluginOptions {
   history?: {
     pushState(state: Record<string, any>, title: string, url: string): void
     replaceState(state: Record<string, any>, title: string, url: string): void
   }
-  location?: { pathname: string; search: string; hash: string }
+  location?: RouterLocation
   pathFromRoutesToWindow?: (path: string) => string
   pathFromWindowToRoutes?: (path: string) => string
   encodeParams?: (obj: Record<string, any>, symbol: string) => string
