@@ -2,7 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
-## 3.1.2 - 2022-09-18
+## 3.1.3 - 2022-11-23
+- Fix it really.
+
+## 3.1.2 - 2022-11-23
 - Fix bug where we didn't take `urlOptions` into account when history and location weren't explicitly passed.
 
 ## 3.1.1 - 2022-09-18
