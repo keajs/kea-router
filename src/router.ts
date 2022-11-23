@@ -184,7 +184,7 @@ export function getRouterContext(): RouterPluginContext {
   let context: RouterPluginContext | undefined = getPluginContext('router')
   if (!context || !context.history || !context.location) {
     const defaultContext = getDefaultContext()
-    if (!context) {
+    if (!context || Object.keys(context).length === 0) {
       context = defaultContext
       setRouterContext(context)
     } else {
