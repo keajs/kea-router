@@ -182,19 +182,9 @@ export const router = kea<routerType>([
 
 export function getRouterContext(): RouterPluginContext {
   let context: RouterPluginContext | undefined = getPluginContext('router')
-  if (!context || !context.history || !context.location) {
-    const defaultContext = getDefaultContext()
-    if (!context) {
-      context = defaultContext
-      setRouterContext(context)
-    } else {
-      if (!context.history) {
-        context.history = defaultContext.history
-      }
-      if (!context.location) {
-        context.location = defaultContext.location
-      }
-    }
+  if (!context.history || !context.location || Object.keys(context).length === 0) {
+    context = { ...getDefaultContext(), ...context }
+    setRouterContext(context)
   }
   return context
 }
