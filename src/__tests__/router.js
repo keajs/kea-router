@@ -1,12 +1,11 @@
 /* global test, expect */
-import { kea, actions, reducers, resetContext } from 'kea'
+import { kea, resetContext } from 'kea'
 
 import '@babel/polyfill'
 
 import { routerPlugin } from '../plugin'
 import { parsePath } from '../utils'
-import { router } from '../router'
-import { urlToAction, actionToUrl, beforeUnload } from '../builders'
+import { router, getEmptyLocation } from '../router'
 
 window.confirm = jest.fn()
 
@@ -425,105 +424,109 @@ test('encode and decode for search and hash', async () => {
   unmount()
 })
 
-test('urlPatternOptions', async () => {
-  const location = {
-    pathname: '/pages/me@gmail.com',
-    search: '',
-    hash: '',
-  }
+describe('urlPatternOptions', () => {
+  let location
+  let history
+  let logic
 
-  const history = {
-    pushState(state, _, url) {
-      Object.assign(location, parsePath(url))
-    },
-    replaceState(state, _, url) {
-      Object.assign(location, parsePath(url))
-    },
-  }
+  beforeEach(() => {
+    location = {
+      pathname: '/pages/me@gmail.com',
+      search: '',
+      hash: '',
+    }
+    history = {
+      pushState(state, _, url) {
+        Object.assign(location, parsePath(url))
+      },
+      replaceState(state, _, url) {
+        Object.assign(location, parsePath(url))
+      },
+    }
+    logic = kea({
+      actions: () => ({
+        page: (page) => ({ page }),
+        list: true,
+      }),
 
-  const logic = kea({
-    actions: () => ({
-      page: (page) => ({ page }),
-      list: true,
-    }),
+      reducers: ({ actions }) => ({
+        activePage: [
+          null,
+          {
+            page: (_, payload) => payload.page,
+            list: () => null,
+          },
+        ],
+      }),
 
-    reducers: ({ actions }) => ({
-      activePage: [
-        null,
-        {
-          page: (_, payload) => payload.page,
-          list: () => null,
-        },
+      urlToAction: ({ actions }) => ({
+        '/pages/:page': ({ page }) => actions.page(page),
+        '/pages': () => actions.list(),
+      }),
+
+      actionToUrl: ({ actions }) => ({
+        [actions.page]: ({ page }) => `/pages/${page}`,
+        [actions.list]: () => `/pages`,
+      }),
+    })
+  })
+
+  test('matching does not work with special characters without custom urlPatternOptions', () => {
+    location.pathname = '/pages/me@gmail.com'
+
+    resetContext({
+      plugins: [
+        routerPlugin({
+          history,
+          location,
+          urlPatternOptions: {
+            // default: 'a-zA-Z0-9-_~ %'
+          },
+        }),
       ],
-    }),
+      createStore: { middleware: [] },
+    })
 
-    urlToAction: ({ actions }) => ({
-      '/pages/:page': ({ page }) => actions.page(page),
-      '/pages': () => actions.list(),
-    }),
+    logic.mount()
 
-    actionToUrl: ({ actions }) => ({
-      [actions.page]: ({ page }) => `/pages/${page}`,
-      [actions.list]: () => `/pages`,
-    }),
+    expect(location.pathname).toBe('/pages/me@gmail.com')
+    expect(logic.values.activePage).toBe(null)
+
+    logic.actions.page('me@gmail.com')
+
+    expect(location.pathname).toBe('/pages/me@gmail.com')
+    expect(logic.values.activePage).toBe('me@gmail.com')
   })
 
-  // TEST 1
+  test('matching works with special characters with custom urlPatternOptions', () => {
+    location.pathname = '/pages/me@gmail.com'
 
-  location.pathname = '/pages/me@gmail.com'
+    resetContext({
+      plugins: [
+        routerPlugin({
+          history,
+          location,
+          urlPatternOptions: {
+            segmentValueCharset: 'a-zA-Z0-9-_~ %.@', // adds '@' to default
+          },
+        }),
+      ],
+      createStore: { middleware: [] },
+    })
 
-  resetContext({
-    plugins: [
-      routerPlugin({
-        history,
-        location,
-        urlPatternOptions: {
-          // default: 'a-zA-Z0-9-_~ %'
-        },
-      }),
-    ],
-    createStore: { middleware: [] },
+    logic.mount()
+
+    expect(location.pathname).toBe('/pages/me@gmail.com')
+    expect(logic.values.activePage).toBe('me@gmail.com')
+
+    logic.actions.page('me@gmail.com')
+
+    expect(location.pathname).toBe('/pages/me@gmail.com')
+    expect(logic.values.activePage).toBe('me@gmail.com')
+
+    logic.actions.list()
+
+    expect(location.pathname).toBe('/pages')
+    expect(logic.values.activePage).toBe(null)
   })
-
-  logic.mount()
-
-  expect(location.pathname).toBe('/pages/me@gmail.com')
-  expect(logic.values.activePage).toBe(null)
-
-  logic.actions.page('me@gmail.com')
-
-  expect(location.pathname).toBe('/pages/me@gmail.com')
-  expect(logic.values.activePage).toBe('me@gmail.com')
-
-  // TEST 2
-
-  location.pathname = '/pages/me@gmail.com'
-
-  resetContext({
-    plugins: [
-      routerPlugin({
-        history,
-        location,
-        urlPatternOptions: {
-          segmentValueCharset: 'a-zA-Z0-9-_~ %.@', // adds '@' to default
-        },
-      }),
-    ],
-    createStore: { middleware: [] },
-  })
-
-  logic.mount()
-
-  expect(location.pathname).toBe('/pages/me@gmail.com')
-  expect(logic.values.activePage).toBe('me@gmail.com')
-
-  logic.actions.page('me@gmail.com')
-
-  expect(location.pathname).toBe('/pages/me@gmail.com')
-  expect(logic.values.activePage).toBe('me@gmail.com')
-
-  logic.actions.list()
-
-  expect(location.pathname).toBe('/pages')
-  expect(logic.values.activePage).toBe(null)
 })

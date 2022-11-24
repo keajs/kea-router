@@ -14,7 +14,7 @@ import {
 } from 'kea'
 import { CombinedLocation, combineUrl, decodeParams as decode, encodeParams as encode } from './utils'
 import { routerType } from './routerType'
-import { LocationChangedPayload, RouterPluginContext } from './types'
+import { LocationChangedPayload, RouterLocation, RouterPluginContext } from './types'
 
 function preventUnload(newLocation?: CombinedLocation): boolean {
   // We only check the last reference for unloading. Generally there should only be one loaded anyway.
@@ -182,9 +182,19 @@ export const router = kea<routerType>([
 
 export function getRouterContext(): RouterPluginContext {
   let context: RouterPluginContext | undefined = getPluginContext('router')
-  if (!context.history || !context.location || Object.keys(context).length === 0) {
-    context = { ...getDefaultContext(), ...context }
-    setRouterContext(context)
+  if (!context || !context.history || !context.location) {
+    const defaultContext = getDefaultContext()
+    if (!context || Object.keys(context).length === 0) {
+      context = defaultContext
+      setRouterContext(context)
+    } else {
+      if (!context.history) {
+        context.history = defaultContext.history
+      }
+      if (!context.location) {
+        context.location = defaultContext.location
+      }
+    }
   }
   return context
 }
@@ -193,14 +203,14 @@ export function setRouterContext(context: RouterPluginContext): void {
   setPluginContext('router', context)
 }
 
-export const memoryHistroy = {
+export const memoryHistory = {
   pushState(state, _, url) {},
   replaceState(state, _, url) {},
 } as RouterPluginContext['history']
 
 export function getDefaultContext(): RouterPluginContext {
   return {
-    history: typeof window !== 'undefined' ? window.history : memoryHistroy,
+    history: typeof window !== 'undefined' ? window.history : memoryHistory,
     location: typeof window !== 'undefined' ? window.location : { pathname: '', search: '', hash: '' },
     encodeParams: encode,
     decodeParams: decode,
