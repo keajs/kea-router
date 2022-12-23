@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
+## 3.1.4 - 2022-12-23
+- Add `transformPathInActions` option to complement existing `pathFromRoutesToWindow` and `pathFromWindowToRoutes`.
+
 ## 3.1.3 - 2022-11-23
 - Fix it really.
 

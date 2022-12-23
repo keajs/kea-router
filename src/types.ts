@@ -15,6 +15,7 @@ export interface RouterPluginOptions {
   location?: RouterLocation
   pathFromRoutesToWindow?: (path: string) => string
   pathFromWindowToRoutes?: (path: string) => string
+  transformPathInActions?: (path: string) => string
   encodeParams?: (obj: Record<string, any>, symbol: string) => string
   decodeParams?: (input: string, symbol: string) => Record<string, any>
   urlPatternOptions?: UrlPatternOptions

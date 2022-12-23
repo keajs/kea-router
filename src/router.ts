@@ -118,6 +118,11 @@ export const router = kea<routerType>([
       }
 
       routerContext.historyStateCount = (routerContext.historyStateCount ?? 0) + 1
+
+      if (routerContext.transformPathInActions) {
+        response.url = routerContext.transformPathInActions(response.url)
+      }
+
       history[`${method}State`]({ count: routerContext.historyStateCount }, '', response.url)
       actions.locationChanged({ method: method.toUpperCase() as 'PUSH' | 'REPLACE', ...response })
     },
@@ -216,6 +221,7 @@ export function getDefaultContext(): RouterPluginContext {
     decodeParams: decode,
     pathFromRoutesToWindow: (path) => path,
     pathFromWindowToRoutes: (path) => path,
+    transformPathInActions: (path) => path,
     beforeUnloadInterceptors: new Set(),
     historyStateCount:
       typeof window !== 'undefined' && typeof window.history.state?.count === 'number'
