@@ -1,7 +1,7 @@
 /* global test, expect */
 import '@babel/polyfill'
 
-import { encodeParams, decodeParams, combineUrl } from '../utils'
+import {encodeParams, decodeParams, combineUrl, arePathsEqual} from '../utils'
 
 test('encode & decode works', async () => {
   const reverseOptions = [
@@ -87,5 +87,23 @@ test('combineUrl works', async () => {
 
   expect(combineUrl('/path')).toEqual({ url: '/path', pathname: '/path', search: '', searchParams: {}, hash: '', hashParams: {} })
   expect(combineUrl('/path?a=b#hash=value')).toEqual({ url: '/path?a=b#hash=value', pathname: '/path', search: '?a=b', searchParams: { a: 'b' }, hash: '#hash=value', hashParams: { hash: 'value' } })
+
+})
+
+test('arePathsEqual works', async () => {
+  expect(arePathsEqual('/path', '/path')).toBe(true)
+  expect(arePathsEqual('/path?a=b+c', '/path?a=b%20c')).toBe(true)
+  expect(arePathsEqual('/path?a=b+c', '/path?a=b c')).toBe(true)
+  expect(arePathsEqual('/path?', '/path')).toBe(true)
+  expect(arePathsEqual('/path?a=1&b=2', '/path?b=2&a=1')).toBe(true)
+
+  expect(arePathsEqual('/path', '/other-path')).toBe(false)
+  expect(arePathsEqual('/path', '/path/')).toBe(false)
+  expect(arePathsEqual('/path', '/path/other')).toBe(false)
+  expect(arePathsEqual('/path', '/path#foo')).toBe(false)
+  expect(arePathsEqual('/path#1', '/path#2')).toBe(false)
+  expect(arePathsEqual('/path?a=1&b=2', '/path?a=1')).toBe(false)
+  expect(arePathsEqual('/path?a=1', '/path?a=1&b=2')).toBe(false)
+
 
 })

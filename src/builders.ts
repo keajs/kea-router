@@ -1,7 +1,7 @@
 import { getRouterContext, router } from './router'
 import UrlPattern from 'url-pattern'
 import { ActionToUrlPayload, BeforeUnloadPayload, LocationChangedPayload, UrlToActionPayload } from './types'
-import { stringOrObjectToString } from './utils'
+import {arePathsEqual, stringOrObjectToString} from './utils'
 import { afterMount, beforeUnmount, BuiltLogic, connect, getContext, listeners, Logic, LogicBuilder } from 'kea'
 
 function assureConnectionToRouter<L extends Logic = Logic>(logic: BuiltLogic<L>) {
@@ -46,7 +46,7 @@ export function actionToUrl<L extends Logic = Logic>(
             stringOrObjectToString(pathInRoutes[2], '#')
           : pathFromRoutesToWindow(pathInRoutes)
 
-        if (currentPathInWindow !== pathInWindow) {
+        if (!arePathsEqual(currentPathInWindow, pathInWindow)) {
           if (Array.isArray(pathInRoutes) && pathInRoutes[3] && pathInRoutes[3].replace) {
             router.actions.replace(pathInWindow)
           } else {
