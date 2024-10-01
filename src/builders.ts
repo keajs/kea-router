@@ -1,7 +1,7 @@
 import { getRouterContext, router } from './router'
 import UrlPattern from 'url-pattern'
 import { ActionToUrlPayload, BeforeUnloadPayload, LocationChangedPayload, UrlToActionPayload } from './types'
-import {arePathsEqual, stringOrObjectToString} from './utils'
+import { stringOrObjectToString } from './utils'
 import { afterMount, beforeUnmount, BuiltLogic, connect, getContext, listeners, Logic, LogicBuilder } from 'kea'
 
 function assureConnectionToRouter<L extends Logic = Logic>(logic: BuiltLogic<L>) {
@@ -38,7 +38,7 @@ export function actionToUrl<L extends Logic = Logic>(
         if (typeof pathInRoutes === 'undefined') {
           return
         }
-        const { pathFromRoutesToWindow } = getRouterContext()
+        const { pathFromRoutesToWindow, arePathsEqual } = getRouterContext()
 
         const pathInWindow = Array.isArray(pathInRoutes)
           ? pathFromRoutesToWindow(pathInRoutes[0]) +

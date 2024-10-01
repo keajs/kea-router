@@ -128,21 +128,20 @@ export function arePathsEqual(a: string, b: string) {
   const decodedSearchA = decodeParams(parsedA.search, '?')
   const decodedSearchB = decodeParams(parsedB.search, '?')
 
-  const searchParamsA = [...Object.entries(decodedSearchA)].sort();
-  const searchParamsB = [...Object.entries(decodedSearchB)].sort();
+  const searchParamsA = [...Object.entries(decodedSearchA)].sort()
+  const searchParamsB = [...Object.entries(decodedSearchB)].sort()
 
   // Compare the sorted search parameters
   if (searchParamsA.length !== searchParamsB.length) {
-    return false;
+    return false
   }
 
   for (let i = 0; i < searchParamsA.length; i++) {
     if (searchParamsA[i][0] !== searchParamsB[i][0] || searchParamsA[i][1] !== searchParamsB[i][1]) {
-      return false;
+      return false
     }
   }
   return true
-
 }
 
 export interface CombinedLocation {

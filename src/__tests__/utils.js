@@ -1,7 +1,7 @@
 /* global test, expect */
 import '@babel/polyfill'
 
-import {encodeParams, decodeParams, combineUrl, arePathsEqual} from '../utils'
+import { encodeParams, decodeParams, combineUrl, arePathsEqual } from '../utils'
 
 test('encode & decode works', async () => {
   const reverseOptions = [
