@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
+## 3.2.0 - 2024-10-01
+- Add `arePathsEqual` option and make the default one more aware of URL encodings and semantics.
+
 ## 3.1.4 - 2022-12-23
 - Add `transformPathInActions` option to complement existing `pathFromRoutesToWindow` and `pathFromWindowToRoutes`.
 
