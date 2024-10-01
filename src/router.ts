@@ -12,8 +12,8 @@ import {
   beforeUnmount,
   setPluginContext,
 } from 'kea'
-import { CombinedLocation, combineUrl, decodeParams as decode, encodeParams as encode } from './utils'
-import { routerType } from './routerType'
+import { arePathsEqual, CombinedLocation, combineUrl, decodeParams as decode, encodeParams as encode } from './utils'
+import type { routerType } from './routerType'
 import { LocationChangedPayload, RouterLocation, RouterPluginContext } from './types'
 
 function preventUnload(newLocation?: CombinedLocation): boolean {
@@ -199,6 +199,9 @@ export function getRouterContext(): RouterPluginContext {
       if (!context.location) {
         context.location = defaultContext.location
       }
+      if (!context.arePathsEqual) {
+        context.arePathsEqual = defaultContext.arePathsEqual
+      }
     }
   }
   return context
@@ -227,6 +230,7 @@ export function getDefaultContext(): RouterPluginContext {
       typeof window !== 'undefined' && typeof window.history.state?.count === 'number'
         ? window.history.state?.count
         : null,
+    arePathsEqual,
   }
 }
 

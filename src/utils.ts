@@ -116,6 +116,34 @@ export function parsePath(
 const _e = encodeParams
 const _d = decodeParams
 
+
+export function arePathsEqual(a: string, b: string) {
+  // both paths need to be parsed, as the raw strings might just have differences in encoding rather than in value,
+  // e.g. /a?b+c and /a?b%20c
+  const parsedA = parsePath(a)
+  const parsedB = parsePath(b)
+  if (parsedA.pathname !== parsedB.pathname || parsedA.hash !== parsedB.hash) {
+    return false
+  }
+  const decodedSearchA = decodeParams(parsedA.search, '?')
+  const decodedSearchB = decodeParams(parsedB.search, '?')
+
+  const searchParamsA = [...Object.entries(decodedSearchA)].sort()
+  const searchParamsB = [...Object.entries(decodedSearchB)].sort()
+
+  // Compare the sorted search parameters
+  if (searchParamsA.length !== searchParamsB.length) {
+    return false
+  }
+
+  for (let i = 0; i < searchParamsA.length; i++) {
+    if (searchParamsA[i][0] !== searchParamsB[i][0] || searchParamsA[i][1] !== searchParamsB[i][1]) {
+      return false
+    }
+  }
+  return true
+}
+
 export interface CombinedLocation {
   pathname: string
   search: string

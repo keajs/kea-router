@@ -38,7 +38,7 @@ export function actionToUrl<L extends Logic = Logic>(
         if (typeof pathInRoutes === 'undefined') {
           return
         }
-        const { pathFromRoutesToWindow } = getRouterContext()
+        const { pathFromRoutesToWindow, arePathsEqual } = getRouterContext()
 
         const pathInWindow = Array.isArray(pathInRoutes)
           ? pathFromRoutesToWindow(pathInRoutes[0]) +
@@ -46,7 +46,7 @@ export function actionToUrl<L extends Logic = Logic>(
             stringOrObjectToString(pathInRoutes[2], '#')
           : pathFromRoutesToWindow(pathInRoutes)
 
-        if (currentPathInWindow !== pathInWindow) {
+        if (!arePathsEqual(currentPathInWindow, pathInWindow)) {
           if (Array.isArray(pathInRoutes) && pathInRoutes[3] && pathInRoutes[3].replace) {
             router.actions.replace(pathInWindow)
           } else {

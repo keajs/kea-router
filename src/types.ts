@@ -19,6 +19,7 @@ export interface RouterPluginOptions {
   encodeParams?: (obj: Record<string, any>, symbol: string) => string
   decodeParams?: (input: string, symbol: string) => Record<string, any>
   urlPatternOptions?: UrlPatternOptions
+  arePathsEqual?: (path1: string, path2: string) => boolean
 }
 
 export interface RouterPluginContext extends RouterPluginOptions {
