@@ -1,6 +1,6 @@
 {
   "name": "kea-router",
-  "version": "3.2.0",
+  "version": "3.2.1",
   "description": "Router plugin for Kea",
   "author": "Marius Andra",
   "license": "MIT",
