@@ -1,4 +1,5 @@
 import { getPluginContext } from 'kea'
+import equal from 'fast-deep-equal'
 
 function parseValue(value: string | null): any {
   if (!Number.isNaN(Number(value)) && typeof value === 'string' && value.trim() !== '') {
@@ -28,7 +29,7 @@ function serializeValue(value: any): string {
   return value
 }
 
-export function decodeParams(input: string, symbol: string = ''): Record<string, any> {
+export function decodeParams(input: string, symbol = ''): Record<string, any> {
   if (symbol && input.indexOf(symbol) === 0) {
     input = input.slice(1)
   }
@@ -52,7 +53,7 @@ export function decodeParams(input: string, symbol: string = ''): Record<string,
   return ret
 }
 
-export function encodeParams(obj: Record<string, any>, symbol: string = ''): string {
+export function encodeParams(obj: Record<string, any>, symbol = ''): string {
   if (typeof obj !== 'object') {
     return ''
   }
@@ -82,9 +83,7 @@ export function stringOrObjectToString(input: any, symbol: string): string {
 }
 
 // copied from react-router! :)
-export function parsePath(
-  path: string,
-): {
+export function parsePath(path: string): {
   pathname: string
   search: string
   hash: string
@@ -116,7 +115,6 @@ export function parsePath(
 const _e = encodeParams
 const _d = decodeParams
 
-
 export function arePathsEqual(a: string, b: string) {
   // both paths need to be parsed, as the raw strings might just have differences in encoding rather than in value,
   // e.g. /a?b+c and /a?b%20c
@@ -137,7 +135,7 @@ export function arePathsEqual(a: string, b: string) {
   }
 
   for (let i = 0; i < searchParamsA.length; i++) {
-    if (searchParamsA[i][0] !== searchParamsB[i][0] || searchParamsA[i][1] !== searchParamsB[i][1]) {
+    if (searchParamsA[i][0] !== searchParamsB[i][0] || !equal(searchParamsA[i][1], searchParamsB[i][1])) {
       return false
     }
   }
