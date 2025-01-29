@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
+## 3.2.1 - 2025-01-29
+- Use deep comparison for URL params in arePathsEqual
+
 ## 3.2.0 - 2024-10-01
 - Add `arePathsEqual` option and make the default one more aware of URL encodings and semantics.
 
