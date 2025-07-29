@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
+## 3.2.2 - 2025-07-29
+- Fix bug in `transformPathInActions` 
+
 ## 3.2.1 - 2025-01-29
 - Use deep comparison for URL params in arePathsEqual
 

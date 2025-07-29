@@ -121,6 +121,7 @@ export const router = kea<routerType>([
 
       if (routerContext.transformPathInActions) {
         response.url = routerContext.transformPathInActions(response.url)
+        response.pathname = routerContext.transformPathInActions(response.pathname)
       }
 
       history[`${method}State`]({ count: routerContext.historyStateCount }, '', response.url)
