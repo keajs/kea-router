@@ -117,12 +117,19 @@ export function urlToAction<L extends Logic = Logic>(
 
     afterMount((logic) => {
       const previousState = getContext().store.getState()
+      const location = { ...router.values.location }
+      const routerContext = getRouterContext()
+
+      if (routerContext.transformPathInActions) {
+        location.pathname = routerContext.transformPathInActions(location.pathname)
+      }
+
       for (const listener of logic.listeners[router.actionTypes.locationChanged] ?? []) {
         listener(
           {
             type: router.actionTypes.locationChanged,
             payload: {
-              ...router.values.location,
+              ...location,
               searchParams: router.values.searchParams,
               hashParams: router.values.hashParams,
               method: 'POP',

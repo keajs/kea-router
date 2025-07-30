@@ -74,19 +74,19 @@ export const router = kea<routerType>([
 
   reducers(() => ({
     location: [
-      getLocationFromContext(),
+      getInitialLocationFromContext(),
       {
         locationChanged: (_, { pathname, search, hash }) => ({ pathname, search, hash }),
       },
     ],
     searchParams: [
-      getRouterContext().decodeParams(getLocationFromContext().search, '?'),
+      getRouterContext().decodeParams(getInitialLocationFromContext().search, '?'),
       {
         locationChanged: (_, { searchParams }) => searchParams,
       },
     ],
     hashParams: [
-      getRouterContext().decodeParams(getLocationFromContext().hash, '#'),
+      getRouterContext().decodeParams(getInitialLocationFromContext().hash, '#'),
       {
         locationChanged: (_, { hashParams }) => hashParams,
       },
@@ -164,14 +164,19 @@ export const router = kea<routerType>([
         typeof eventStateCount === 'number' ? eventStateCount : routerContext.historyStateCount
 
       if (location) {
+        let pathname = location.pathname
+        if (routerContext.transformPathInActions) {
+          pathname = routerContext.transformPathInActions(pathname)
+        }
+
         actions.locationChanged({
           method: 'POP',
-          pathname: location.pathname,
+          pathname: pathname,
           search: location.search,
           searchParams: decodeParams(location.search, '?'),
           hash: location.hash,
           hashParams: decodeParams(location.hash, '#'),
-          url: `${location.pathname}${location.search}${location.hash}`,
+          url: `${pathname}${location.search}${location.hash}`,
         })
       }
     }
@@ -235,9 +240,14 @@ export function getDefaultContext(): RouterPluginContext {
   }
 }
 
-function getLocationFromContext() {
-  const {
-    location: { pathname, search, hash },
-  } = getRouterContext()
+function getInitialLocationFromContext() {
+  const routerContext = getRouterContext()
+  const { search, hash } = routerContext.location
+  let { pathname } = routerContext.location
+
+  if (routerContext.transformPathInActions) {
+    pathname = routerContext.transformPathInActions(pathname)
+  }
+
   return { pathname, search, hash }
 }

@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
+## 3.3.0 - 2025-07-30
+- If it's present, call `transformPathInActions` on initial pathnames as well 
+
 ## 3.2.2 - 2025-07-29
 - Fix bug in `transformPathInActions` 
 
