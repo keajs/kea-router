@@ -134,9 +134,21 @@ export const router = kea<routerType>([
     replace: sharedListeners.updateLocation,
   })),
 
-  afterMount(({ actions, cache }) => {
+  afterMount(({ actions, cache, values }) => {
     if (typeof window === 'undefined') {
       return
+    }
+
+    if (getRouterContext().replaceInitialPathInWindow) {
+      const path = values.location.pathname
+      const windowPath = window.location.pathname
+      if (windowPath !== path) {
+        window.history.replaceState(
+          { count: getRouterContext().historyStateCount },
+          '',
+          path + values.location.search + values.location.hash,
+        )
+      }
     }
 
     cache.popListener = (event: PopStateEvent) => {

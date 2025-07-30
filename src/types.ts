@@ -16,6 +16,7 @@ export interface RouterPluginOptions {
   pathFromRoutesToWindow?: (path: string) => string
   pathFromWindowToRoutes?: (path: string) => string
   transformPathInActions?: (path: string) => string
+  replaceInitialPathInWindow?: boolean
   encodeParams?: (obj: Record<string, any>, symbol: string) => string
   decodeParams?: (input: string, symbol: string) => Record<string, any>
   urlPatternOptions?: UrlPatternOptions
