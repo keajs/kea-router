@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
+## 3.4.0 - 2025-07-31
+- Persist `routerState` into `history`. Configure with `routerContext.getRouterState`, receive it back on the `locationChanged` action.   
+
 ## 3.3.1 - 2025-07-30
 - Add the `replaceInitialPathInWindow` option
 

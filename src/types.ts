@@ -17,6 +17,7 @@ export interface RouterPluginOptions {
   pathFromWindowToRoutes?: (path: string) => string
   transformPathInActions?: (path: string) => string
   replaceInitialPathInWindow?: boolean
+  getRouterState?: (location: CombinedLocation) => Record<string, any> | undefined
   encodeParams?: (obj: Record<string, any>, symbol: string) => string
   decodeParams?: (input: string, symbol: string) => Record<string, any>
   urlPatternOptions?: UrlPatternOptions
@@ -61,6 +62,7 @@ export interface LocationChangedPayload {
   hash: string
   hashParams: Record<string, any>
   url: string
+  routerState?: Record<string, any>
   initial?: boolean
 }
 

@@ -61,6 +61,8 @@ export const router = kea<routerType>([
       hash,
       hashParams,
       initial,
+      url,
+      routerState,
     }: LocationChangedPayload) => ({
       method,
       pathname,
@@ -69,6 +71,8 @@ export const router = kea<routerType>([
       hash,
       hashParams,
       initial: initial || false,
+      url,
+      routerState,
     }),
   }),
 
@@ -95,6 +99,12 @@ export const router = kea<routerType>([
       null as string | null,
       {
         locationChanged: (_, { method }) => method,
+      },
+    ],
+    routerState: [
+      null as Record<string, any> | null,
+      {
+        locationChanged: (_, { routerState }) => routerState || null,
       },
     ],
   })),
@@ -124,8 +134,19 @@ export const router = kea<routerType>([
         response.pathname = routerContext.transformPathInActions(response.pathname)
       }
 
-      history[`${method}State`]({ count: routerContext.historyStateCount }, '', response.url)
-      actions.locationChanged({ method: method.toUpperCase() as 'PUSH' | 'REPLACE', ...response })
+      const state: Record<string, any> = { count: routerContext.historyStateCount }
+      if (routerContext.getRouterState) {
+        const routerState = routerContext.getRouterState(response)
+        if (routerState) {
+          state.routerState = routerState
+        }
+      }
+      history[`${method}State`](state, '', response.url)
+      actions.locationChanged({
+        method: method.toUpperCase() as 'PUSH' | 'REPLACE',
+        routerState: state.routerState,
+        ...response,
+      })
     },
   })),
 
@@ -143,11 +164,17 @@ export const router = kea<routerType>([
       const path = values.location.pathname
       const windowPath = window.location.pathname
       if (windowPath !== path) {
-        window.history.replaceState(
-          { count: getRouterContext().historyStateCount },
-          '',
-          path + values.location.search + values.location.hash,
-        )
+        const routerContext = getRouterContext()
+        const state: Record<string, any> = { count: routerContext.historyStateCount }
+        if (routerContext.getRouterState) {
+          const routerState = routerContext.getRouterState(
+            combineUrl(path + values.location.search + values.location.hash),
+          )
+          if (routerState) {
+            state.routerState = routerState
+          }
+        }
+        window.history.replaceState(state, '', path + values.location.search + values.location.hash)
       }
     }
 
@@ -156,6 +183,7 @@ export const router = kea<routerType>([
       const { location, decodeParams } = routerContext
 
       const eventStateCount = event.state?.count
+      const routerState = event.state?.routerState
 
       if (eventStateCount !== routerContext.historyStateCount && preventUnload()) {
         if (typeof eventStateCount !== 'number' || routerContext.historyStateCount === null) {
@@ -189,6 +217,7 @@ export const router = kea<routerType>([
           hash: location.hash,
           hashParams: decodeParams(location.hash, '#'),
           url: `${pathname}${location.search}${location.hash}`,
+          routerState: routerState,
         })
       }
     }
@@ -243,6 +272,7 @@ export function getDefaultContext(): RouterPluginContext {
     pathFromRoutesToWindow: (path) => path,
     pathFromWindowToRoutes: (path) => path,
     transformPathInActions: (path) => path,
+    getRouterState: undefined,
     beforeUnloadInterceptors: new Set(),
     historyStateCount:
       typeof window !== 'undefined' && typeof window.history.state?.count === 'number'

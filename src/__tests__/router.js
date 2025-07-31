@@ -280,6 +280,8 @@ test('encode and decode for search and hash', async () => {
                 a: 'b',
               },
             },
+            routerState: undefined,
+            url: '/pages/second?key=value&obj=%7B%22a%22%3A%22b%22%7D&bool=true&number=3.14#hashishere',
           })
         } else if (id === 'third') {
           expect(search).toEqual({ search: 'ishere' })
@@ -292,10 +294,12 @@ test('encode and decode for search and hash', async () => {
             initial: false,
             method: 'PUSH',
             pathname: '/pages/third',
+            routerState: undefined,
             search: '?search=ishere',
             searchParams: {
               search: 'ishere',
             },
+            url: '/pages/third?search=ishere#hash=isalsohere',
           })
         } else if (id === 'fourth') {
           expect(search).toEqual({ key: 'value', otherkey: 'value' })
@@ -309,11 +313,13 @@ test('encode and decode for search and hash', async () => {
             initial: false,
             method: 'PUSH',
             pathname: '/pages/fourth',
+            routerState: undefined,
             search: '?key=value&otherkey=value',
             searchParams: {
               key: 'value',
               otherkey: 'value',
             },
+            url: '/pages/fourth?key=value&otherkey=value#hashishere&morehash=false',
           })
         } else if (id === 'fifth') {
           expect(search).toEqual({ foo: 'bar', key: 'meh', otherKey: 'value' })
@@ -327,12 +333,14 @@ test('encode and decode for search and hash', async () => {
             initial: false,
             method: 'PUSH',
             pathname: '/pages/fifth',
+            routerState: undefined,
             search: '?key=meh&foo=bar&otherKey=value',
             searchParams: {
               foo: 'bar',
               key: 'meh',
               otherKey: 'value',
             },
+            url: '/pages/fifth?key=meh&foo=bar&otherKey=value#hashishere&morehash=false',
           })
         } else if (id === 'sixth') {
           expect(search).toEqual({ search: 'inline' })
@@ -345,10 +353,12 @@ test('encode and decode for search and hash', async () => {
             initial: false,
             method: 'PUSH',
             pathname: '/pages/sixth',
+            routerState: undefined,
             search: '?search=inline',
             searchParams: {
               search: 'inline',
             },
+            url: '/pages/sixth?search=inline#hash=alsoinline',
           })
         }
 
@@ -528,5 +538,53 @@ describe('urlPatternOptions', () => {
 
     expect(location.pathname).toBe('/pages')
     expect(logic.values.activePage).toBe(null)
+  })
+})
+
+
+describe('routerState', () => {
+  let routerState
+  let location
+  let history
+
+  beforeEach(() => {
+    routerState = {}
+    location = {
+      pathname: '/pages/me@gmail.com',
+      search: '',
+      hash: '',
+    }
+    history = {
+      pushState(state, _, url) {
+        Object.assign(location, parsePath(url))
+        Object.assign(routerState, state)
+      },
+      replaceState(state, _, url) {
+        Object.assign(location, parsePath(url))
+        Object.assign(routerState, state)
+      },
+    }
+  })
+
+  test('routerState works', () => {
+    location.pathname = '/pages/me@gmail.com'
+
+    resetContext({
+      plugins: [
+        routerPlugin({
+          history,
+          location,
+          getRouterState: (location) => {
+            return { hello: 'world', url: location.url }
+          },
+        }),
+      ],
+      createStore: { middleware: [] },
+    })
+
+    router.actions.push('/hello')
+    expect(router.values.routerState).toEqual({ hello: 'world', url: '/hello' })
+    router.actions.push('/world')
+    expect(router.values.routerState).toEqual({ hello: 'world', url: '/world' })
   })
 })
