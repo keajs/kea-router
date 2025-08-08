@@ -53,6 +53,8 @@ export const router = kea<routerType>([
       searchInput,
       hashInput,
     }),
+    refreshRouterState: true, // refresh the router state without triggering a full "replace" action
+    _updateRouterState: (routerState: Record<string, any>) => ({ routerState }),
     locationChanged: ({
       method,
       pathname,
@@ -150,9 +152,28 @@ export const router = kea<routerType>([
     },
   })),
 
-  listeners(({ sharedListeners }) => ({
+  listeners(({ sharedListeners, actions, values }) => ({
     push: sharedListeners.updateLocation,
     replace: sharedListeners.updateLocation,
+    refreshRouterState: () => {
+      const { currentLocation } = values
+      const routerContext = getRouterContext()
+      const state: Record<string, any> = { count: routerContext.historyStateCount }
+
+      if (routerContext.getRouterState) {
+        const combinedLocation = combineUrl(currentLocation.pathname, currentLocation.search, currentLocation.hash)
+        const routerState = routerContext.getRouterState(combinedLocation)
+        if (routerState) {
+          state.routerState = routerState
+        }
+      }
+      actions._updateRouterState(state)
+    },
+    _updateRouterState: ({ routerState }) => {
+      const { currentLocation } = values
+      const combinedLocation = combineUrl(currentLocation.pathname, currentLocation.search, currentLocation.hash)
+      history[`replaceState`](routerState, '', combinedLocation.url)
+    },
   })),
 
   afterMount(({ actions, cache, values }) => {

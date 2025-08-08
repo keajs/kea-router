@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
+## 3.4.1 - 2025-08-08
+- Add the `refreshRouterState` action to force a refresh of the `routerState` in the `history` stack.
+
 ## 3.4.0 - 2025-07-31
 - Persist `routerState` into `history`. Configure with `routerContext.getRouterState`, receive it back on the `locationChanged` action.   
 
