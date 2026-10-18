@@ -1,5 +1,6 @@
 import { getPluginContext } from 'kea'
 import equal from 'fast-deep-equal'
+import type { UrlPatternOptions } from './types'
 
 function parseValue(value: string | null): any {
   if (!Number.isNaN(Number(value)) && typeof value === 'string' && value.trim() !== '') {
@@ -184,4 +185,25 @@ export function combineUrl(
   response.hash = encodeParams(response.hashParams, '#')
   response.url = `${response.pathname}${response.search}${response.hash}`
   return response
+}
+
+/**
+ * The literal text in a url-pattern path before its first special character. url-pattern anchors its regular
+ * expression and matches literal text exactly, so only a path that starts with this prefix can match the pattern.
+ */
+export function getStaticPrefix(path: string, options?: UrlPatternOptions): string {
+  const specialChars = [
+    options?.segmentNameStartChar ?? ':',
+    options?.optionalSegmentStartChar ?? '(',
+    options?.wildcardChar ?? '*',
+    options?.escapeChar ?? '\\',
+  ]
+  let end = path.length
+  for (const char of specialChars) {
+    const index = path.indexOf(char)
+    if (index !== -1 && index < end) {
+      end = index
+    }
+  }
+  return path.slice(0, end)
 }

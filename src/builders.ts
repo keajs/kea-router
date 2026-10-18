@@ -1,7 +1,7 @@
 import { getRouterContext, router } from './router'
 import UrlPattern from 'url-pattern'
 import { ActionToUrlPayload, BeforeUnloadPayload, LocationChangedPayload, UrlToActionPayload } from './types'
-import { stringOrObjectToString } from './utils'
+import { getStaticPrefix, stringOrObjectToString } from './utils'
 import { afterMount, beforeUnmount, BuiltLogic, connect, getContext, listeners, Logic, LogicBuilder } from 'kea'
 
 function assureConnectionToRouter<L extends Logic = Logic>(logic: BuiltLogic<L>) {
@@ -81,9 +81,12 @@ export function urlToAction<L extends Logic = Logic>(
     const newListeners: Record<string, any> = {}
     const { urlPatternOptions, pathFromWindowToRoutes } = getRouterContext()
 
+    // Compiling a pattern is the costly part of matching, so compile each one on first use, and skip routes whose
+    // static prefix the path does not start with. An app with hundreds of routes then compiles only a few per load.
     const routes = Object.entries(inputEntries).map(([pathFromRoutes, action]) => ({
       path: pathFromRoutes,
-      pattern: new UrlPattern(pathFromRoutes, urlPatternOptions),
+      prefix: getStaticPrefix(pathFromRoutes, urlPatternOptions),
+      pattern: null as UrlPattern | null,
       action: action,
     }))
 
@@ -101,6 +104,10 @@ export function urlToAction<L extends Logic = Logic>(
       let params
 
       for (const route of routes) {
+        if (pathInRoutes.indexOf(route.prefix) !== 0) {
+          continue
+        }
+        route.pattern ??= new UrlPattern(route.path, urlPatternOptions)
         params = route.pattern.match(pathInRoutes)
         if (params) {
           matchedRoute = route

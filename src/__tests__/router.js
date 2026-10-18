@@ -588,3 +588,50 @@ describe('routerState', () => {
     expect(router.values.routerState).toEqual({ hello: 'world', url: '/world' })
   })
 })
+
+test('urlToAction runs the first route that matches, across url-pattern syntax', async () => {
+  const location = { pathname: '/start', search: '', hash: '' }
+  const history = {
+    pushState(state, _, url) {
+      Object.assign(location, parsePath(url))
+    },
+    replaceState(state, _, url) {
+      Object.assign(location, parsePath(url))
+    },
+  }
+  resetContext({ plugins: [routerPlugin({ history, location })], createStore: { middleware: [] } })
+
+  const matched = []
+  const record = (name) => (params) => matched.push([name, params])
+
+  kea({
+    urlToAction: {
+      '/things/new': record('thingsNew'),
+      '/things/:id': record('thing'),
+      '/things/:id/edit': record('thingEdit'),
+      '(/:section)/overview': record('optionalLeadingSegment'),
+      '/files/*': record('files'),
+      '/literal\\:colon': record('escapedColon'),
+      '/Case': record('case'),
+      '*': record('fallback'),
+    },
+  }).mount()
+
+  const expectations = [
+    ['/things/new', 'thingsNew', {}],
+    ['/things/42', 'thing', { id: '42' }],
+    ['/things/42/edit', 'thingEdit', { id: '42' }],
+    ['/overview', 'optionalLeadingSegment', {}],
+    ['/reports/overview', 'optionalLeadingSegment', { section: 'reports' }],
+    ['/files/a/b.txt', 'files', { _: 'a/b.txt' }],
+    ['/literal:colon', 'escapedColon', {}],
+    ['/Case', 'case', {}],
+    ['/case', 'fallback', { _: '/case' }],
+    ['/thingsnew', 'fallback', { _: '/thingsnew' }],
+  ]
+  for (const [url, name, params] of expectations) {
+    matched.length = 0
+    router.actions.push(url)
+    expect(matched).toEqual([[name, params]])
+  }
+})

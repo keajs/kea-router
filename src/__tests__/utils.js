@@ -1,7 +1,7 @@
 /* global test, expect */
 import '@babel/polyfill'
 
-import { encodeParams, decodeParams, combineUrl, arePathsEqual } from '../utils'
+import { encodeParams, decodeParams, combineUrl, arePathsEqual, getStaticPrefix } from '../utils'
 
 test('encode & decode works', async () => {
   const reverseOptions = [
@@ -109,4 +109,20 @@ test('arePathsEqual works', async () => {
   expect(arePathsEqual('/path?a=1', '/path?a=1&b=2')).toBe(false)
   expect(arePathsEqual('/path#1', '/path#2')).toBe(false)
   expect(arePathsEqual('/path?a=1&b=2#foo', '/path?b=2&a=1#bar')).toBe(false)
+})
+
+test('getStaticPrefix returns the literal text before the first url-pattern special character', async () => {
+  expect(getStaticPrefix('/pages/first')).toBe('/pages/first')
+  expect(getStaticPrefix('/pages/:id')).toBe('/pages/')
+  expect(getStaticPrefix('/pages(/:id)')).toBe('/pages')
+  expect(getStaticPrefix('(/:section)/overview')).toBe('')
+  expect(getStaticPrefix('/files/*')).toBe('/files/')
+  expect(getStaticPrefix('*')).toBe('')
+  expect(getStaticPrefix('/literal\\:colon')).toBe('/literal')
+
+  expect(getStaticPrefix('/pages/$id', { segmentNameStartChar: '$' })).toBe('/pages/')
+  expect(getStaticPrefix('/pages/:id', { segmentNameStartChar: '$' })).toBe('/pages/:id')
+  expect(getStaticPrefix('/files/%', { wildcardChar: '%' })).toBe('/files/')
+  expect(getStaticPrefix('/pages[/:id]', { optionalSegmentStartChar: '[', optionalSegmentEndChar: ']' })).toBe('/pages')
+  expect(getStaticPrefix('/literal!:colon', { escapeChar: '!' })).toBe('/literal')
 })
