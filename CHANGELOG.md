@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
+## 3.4.2 - 2026-10-18
+- Compile urlToAction route patterns on first use
+
 ## 3.4.1 - 2025-08-08
 - Add the `refreshRouterState` action to force a refresh of the `routerState` in the `history` stack.
 
